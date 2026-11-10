@@ -47,7 +47,7 @@ function CardSaldo({ d }: { d: Dados }) {
   return (
     <section className="card saldo">
       <h2>Saldo previsto</h2>
-      <Ilustracao Icone={Wallet} tom="verde" />
+      <Ilustracao imagem="carteira" Icone={Wallet} tom="verde" />
       <div className="head">
         <Valor c={s.sobra} tamanho="b-xl" />
         <div className="note">
@@ -110,7 +110,7 @@ function CardContas({ d }: { d: Dados }) {
       <h2>
         Contas a pagar {resumo.proxima && <small>· próxima dia {dd(resumo.proxima.dia)}</small>}
       </h2>
-      <Ilustracao Icone={CalendarDays} tom="azul" />
+      <Ilustracao imagem="calendario" Icone={CalendarDays} tom="azul" />
       <div style={{ marginTop: 10 }}><Valor c={resumo.emAberto} /></div>
       <div className="lbl">{resumo.pagas} de {resumo.total} pagas em {nomeMes(d.mes)}</div>
       <div className="chips">
@@ -177,7 +177,7 @@ function CardDeve({ d }: { d: Dados }) {
   return (
     <section className="card deve">
       <h2>Quem me deve</h2>
-      <Ilustracao Icone={Scale} tom="rosa" />
+      <Ilustracao imagem="dinheiro" Icone={Scale} tom="rosa" />
       <div className="lbl" style={{ marginTop: 14 }}>Total a receber</div>
       <Valor c={total} />
       {primeiro ? (
@@ -263,7 +263,7 @@ function CardCartao({ d }: { d: Dados }) {
   return (
     <section className="card cartao">
       <h2>Cartão</h2>
-      <Ilustracao Icone={CreditCard} tom="laranja" />
+      <Ilustracao imagem="cartao" Icone={CreditCard} tom="laranja" />
       <div className="lbl" style={{ marginTop: 14 }}>Fatura de {nomeMes(d.mes)}{projetada ? ' · prevista' : ''}</div>
       <Valor c={d.total} />
       <div className="row" style={{ marginTop: 10, flexWrap: 'wrap' }}>
@@ -319,7 +319,7 @@ function CardMetas({ d }: { d: Dados }) {
   return (
     <section className="card metas">
       <h2>Metas e reserva</h2>
-      <Ilustracao Icone={PiggyBank} tom="ambar" />
+      <Ilustracao imagem="reserva" Icone={PiggyBank} tom="ambar" />
       <div className="lbl" style={{ marginTop: 14 }}>Total guardado</div>
       <Valor c={totalGuardado(d.metas)} />
       {d.metas.length ? (
