@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { categoria, emojiDaCategoria, normalizar } from './categoria'
+import { CATEGORIAS, categoria, normalizar } from './categoria'
 
 describe('categoria automática', () => {
   it.each([
@@ -40,8 +40,7 @@ describe('auxiliares', () => {
   it('normalizar tira acento e caixa', () => {
     expect(normalizar('  Lançamentos ')).toBe('lancamentos')
   })
-  it('emoji da categoria', () => {
-    expect(emojiDaCategoria('vestuario')).toBe('👕')
-    expect(emojiDaCategoria('Inventada')).toBe('📦')
+  it('as 12 categorias da planilha', () => {
+    expect(CATEGORIAS.map((c) => c.nome)).toHaveLength(12)
   })
 })

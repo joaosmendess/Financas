@@ -11,6 +11,7 @@ import {
 } from '@/data/mutacoes'
 import { CATEGORIAS, categoria } from '@/domain/categoria'
 import { formatar, paraCampo } from '@/domain/dinheiro'
+import { iconeMeta } from '@/domain/icones'
 import { depositar, retirar } from '@/domain/metas'
 import { nomeMesAno } from '@/domain/meses'
 import { normalizarParcela } from '@/domain/parcelas'
@@ -47,7 +48,7 @@ export function FormLancamento({ mes, lancamento }: { mes: Mes; lancamento?: Lan
         { nome: 'parcela', rotulo: 'Parcela (ex.: 02/10)', placeholder: 'à vista' },
         {
           nome: 'categoria', rotulo: 'Categoria', tipo: 'select',
-          opcoes: [['', 'Automática'], ...CATEGORIAS.map((c) => [c.nome, `${c.emoji} ${c.nome}`] as const)],
+          opcoes: [['', 'Automática'], ...CATEGORIAS.map((c) => [c.nome, c.nome] as const)],
         },
         { nome: 'dono', rotulo: 'De quem é', tipo: 'select', opcoes: donoOpcoes(pessoas) },
       ]}
@@ -201,7 +202,7 @@ export function FormMeta({ meta }: { meta?: Meta }) {
     <Formulario
       titulo={meta ? 'Editar meta' : 'Nova meta'}
       campos={[
-        { nome: 'emoji', rotulo: 'Emoji' },
+        { nome: 'emoji', rotulo: 'Ícone', tipo: 'icone' },
         { nome: 'nome', rotulo: 'Nome', obrigatorio: true },
         { nome: 'alvo', rotulo: 'Quanto quer juntar (R$)', tipo: 'dinheiro', obrigatorio: true, positivo: true },
         { nome: 'atual', rotulo: 'Quanto já tem (R$)', tipo: 'dinheiro', positivo: true },
@@ -210,7 +211,7 @@ export function FormMeta({ meta }: { meta?: Meta }) {
         { nome: 'dia', rotulo: 'Dia de guardar', tipo: 'number', min: 1, max: 31 },
       ]}
       inicial={{
-        emoji: meta?.emoji ?? '🎯',
+        emoji: iconeMeta(meta?.emoji),
         nome: meta?.nome ?? '',
         alvo: meta ? paraCampo(meta.alvo_centavos) : '',
         atual: meta ? paraCampo(meta.atual_centavos) : '',
@@ -221,7 +222,7 @@ export function FormMeta({ meta }: { meta?: Meta }) {
       aoSalvar={(v) =>
         salvar.mutateAsync({
           id: meta?.id,
-          emoji: txt(v.emoji) || '🎯',
+          emoji: iconeMeta(txt(v.emoji)),
           nome: txt(v.nome),
           alvo_centavos: num(v.alvo),
           atual_centavos: num(v.atual),

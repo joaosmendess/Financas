@@ -1,9 +1,13 @@
-import { ArrowDownRight, ArrowRight, ArrowUpRight, Check, Pencil } from 'lucide-react'
+import {
+  ArrowDownRight, ArrowRight, ArrowUpRight, CalendarDays, Check, CreditCard, Pencil, PiggyBank, Scale, Sparkles, Wallet,
+} from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { useUsuario } from '@/auth/AuthProvider'
 import { Avatar, Ponto } from '@/components/Avatar'
 import { Confirmar, useDialogo } from '@/components/Dialogo'
+import { IconeDaCategoria, IconeDaMeta, Ilustracao } from '@/components/icones'
+import { Esqueleto } from '@/components/Esqueleto'
 import { Valor } from '@/components/Valor'
 import { CartaoCredito } from '@/components/ui/cartao-credito'
 import { useAlternarPagamento, useReceberTudo } from '@/data/mutacoes'
@@ -43,7 +47,7 @@ function CardSaldo({ d }: { d: Dados }) {
   return (
     <section className="card saldo">
       <h2>Saldo previsto</h2>
-      <div className="illus" aria-hidden="true">👛</div>
+      <Ilustracao Icone={Wallet} tom="verde" />
       <div className="head">
         <Valor c={s.sobra} tamanho="b-xl" />
         <div className="note">
@@ -106,7 +110,7 @@ function CardContas({ d }: { d: Dados }) {
       <h2>
         Contas a pagar {resumo.proxima && <small>· próxima dia {dd(resumo.proxima.dia)}</small>}
       </h2>
-      <div className="illus" aria-hidden="true">🗓️</div>
+      <Ilustracao Icone={CalendarDays} tom="azul" />
       <div style={{ marginTop: 10 }}><Valor c={resumo.emAberto} /></div>
       <div className="lbl">{resumo.pagas} de {resumo.total} pagas em {nomeMes(d.mes)}</div>
       <div className="chips">
@@ -173,7 +177,7 @@ function CardDeve({ d }: { d: Dados }) {
   return (
     <section className="card deve">
       <h2>Quem me deve</h2>
-      <div className="illus" aria-hidden="true">⚖️</div>
+      <Ilustracao Icone={Scale} tom="rosa" />
       <div className="lbl" style={{ marginTop: 14 }}>Total a receber</div>
       <Valor c={total} />
       {primeiro ? (
@@ -259,7 +263,7 @@ function CardCartao({ d }: { d: Dados }) {
   return (
     <section className="card cartao">
       <h2>Cartão</h2>
-      <div className="illus" aria-hidden="true">💳</div>
+      <Ilustracao Icone={CreditCard} tom="laranja" />
       <div className="lbl" style={{ marginTop: 14 }}>Fatura de {nomeMes(d.mes)}{projetada ? ' · prevista' : ''}</div>
       <Valor c={d.total} />
       <div className="row" style={{ marginTop: 10, flexWrap: 'wrap' }}>
@@ -315,7 +319,7 @@ function CardMetas({ d }: { d: Dados }) {
   return (
     <section className="card metas">
       <h2>Metas e reserva</h2>
-      <div className="illus" aria-hidden="true">🐷</div>
+      <Ilustracao Icone={PiggyBank} tom="ambar" />
       <div className="lbl" style={{ marginTop: 14 }}>Total guardado</div>
       <Valor c={totalGuardado(d.metas)} />
       {d.metas.length ? (
@@ -332,7 +336,7 @@ function CardMetas({ d }: { d: Dados }) {
             return (
               <div key={m.id} className="meta">
                 <div className="top2">
-                  <span className="ico">{m.emoji || '🎯'}</span>
+                  <span className="ico"><IconeDaMeta chave={m.emoji} /></span>
                   <span className="name">
                     {m.nome}
                     <small className="num">{formatar(m.atual_centavos)} de {formatar(m.alvo_centavos)}</small>
@@ -343,7 +347,7 @@ function CardMetas({ d }: { d: Dados }) {
                 <div className="hint">
                   <span>{m.prazo ? `até ${nomeMesCurto(m.prazo, 0).split(' ')[0]} ${m.prazo.slice(0, 4)}` : 'sem prazo'}</span>
                   <span>
-                    {p.batida ? 'Meta batida 🎉' : p.precisaPorMes ? `precisa ${formatar(p.precisaPorMes)}/mês` : `faltam ${formatar(p.falta)}`}
+                    {p.batida ? 'Meta batida' : p.precisaPorMes ? `precisa ${formatar(p.precisaPorMes)}/mês` : `faltam ${formatar(p.falta)}`}
                   </span>
                 </div>
               </div>
@@ -380,7 +384,7 @@ function CardCategorias({ d }: { d: Dados }) {
         <div className="cats">
           {d.categorias.map((c) => (
             <div key={c.nome} className="catrow">
-              <span className="n">{c.nome}</span>
+              <span className="n"><IconeDaCategoria nome={c.nome} className="cat-ico" />{c.nome}</span>
               <span className="v num">
                 {formatar(c.total)} <span className="muted" style={{ fontWeight: 500 }}>· {pct(c.total, d.total)}%</span>
               </span>
@@ -405,12 +409,12 @@ function CardCategorias({ d }: { d: Dados }) {
 export function VisaoGeral() {
   const d = useDadosDoMes()
   const adicionar = useAdicionar(d.mes)
-  if (d.carregando) return <div className="card lbl" role="status">Carregando…</div>
+  if (d.carregando) return <Esqueleto cards={4} />
   return (
     <div className="painel">
       {d.vazio && (
         <div className="banner" style={{ gridColumn: '1/-1', background: 'var(--blue-soft)', margin: 0 }}>
-          <span>👋</span>
+          <Sparkles className="banner-ico" aria-hidden="true" />
           <div className="grow">Comece importando a planilha da fatura do Itaú, ou vá adicionando à mão: lançamentos, contas, pessoas e metas.</div>
           <button type="button" className="btn sm primary" onClick={() => adicionar('import')}>Importar planilha</button>
           <button type="button" className="btn sm" onClick={() => adicionar('lanc')}>Adicionar à mão</button>

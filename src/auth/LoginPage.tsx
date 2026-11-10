@@ -1,3 +1,4 @@
+import { HandCoins, Lock, PiggyBank, Wallet, Wifi } from 'lucide-react'
 import { useState } from 'react'
 import { Navigate } from 'react-router'
 import { Carregando } from './RequireAuth'
@@ -14,40 +15,43 @@ function LogoGoogle() {
   )
 }
 
-/** Vitrine decorativa: cartão do Itaú flutuando e fichas do app entrando em sequência. */
+/** Vitrine decorativa: um cartão genérico flutuando e fichas do app entrando em sequência. */
 function Vitrine() {
+  const fichas = [
+    { Icone: Wallet, titulo: 'Saldo previsto', texto: 'sobra no fim do mês' },
+    { Icone: HandCoins, titulo: 'Quem me deve', texto: 'compras do cartão e Pix' },
+    { Icone: PiggyBank, titulo: 'Metas e reserva', texto: 'quanto guardar por mês' },
+  ]
   return (
     <div className="login-vitrine" aria-hidden="true">
       <div className="login-cartao">
         <div className="login-cartao-brilho" />
         <div className="flex items-center justify-between">
-          <span className="login-cartao-logo">itaú</span>
-          <span className="login-cartao-pill">Aberta</span>
+          <span className="login-cartao-marca">Crédito</span>
+          <Wifi className="login-cartao-nfc" />
         </div>
-        <div className="login-cartao-tier">PLATINUM</div>
+        <svg viewBox="0 0 34 26" className="w-[38px]">
+          <rect x=".5" y=".5" width="33" height="25" rx="5" fill="#F5D58A" stroke="#C9A24E" />
+          <path d="M0 9h11M0 17h11M23 9h11M23 17h11M11 0v26M23 0v26" stroke="#C9A24E" />
+        </svg>
+        <div className="login-cartao-numero num">•••• •••• •••• ••••</div>
         <div className="flex items-end justify-between">
-          <svg viewBox="0 0 34 26" className="w-[34px]">
-            <rect x=".5" y=".5" width="33" height="25" rx="5" fill="#F5D58A" stroke="#C9A24E" />
-            <path d="M0 9h11M0 17h11M23 9h11M23 17h11M11 0v26M23 0v26" stroke="#C9A24E" />
-          </svg>
+          <div>
+            <small>Titular</small>
+            <b>SEU NOME</b>
+          </div>
           <span className="flex">
-            <i className="login-bola" style={{ background: 'rgba(235,0,27,.9)' }} />
-            <i className="login-bola" style={{ background: 'rgba(247,158,27,.9)', marginLeft: -10 }} />
+            <i className="login-bola" />
+            <i className="login-bola" style={{ marginLeft: -10, opacity: 0.55 }} />
           </span>
         </div>
       </div>
-      <div className="login-ficha" style={{ ['--i' as string]: 0 }}>
-        <span className="login-ficha-ico">👛</span>
-        <div><small>Saldo previsto</small><b className="num">sobra no fim do mês</b></div>
-      </div>
-      <div className="login-ficha" style={{ ['--i' as string]: 1 }}>
-        <span className="login-ficha-ico">🤝</span>
-        <div><small>Quem me deve</small><b className="num">compras do cartão e Pix</b></div>
-      </div>
-      <div className="login-ficha" style={{ ['--i' as string]: 2 }}>
-        <span className="login-ficha-ico">🐷</span>
-        <div><small>Metas e reserva</small><b className="num">quanto guardar por mês</b></div>
-      </div>
+      {fichas.map(({ Icone, titulo, texto }, i) => (
+        <div key={titulo} className="login-ficha" style={{ ['--i' as string]: i }}>
+          <span className="login-ficha-ico"><Icone /></span>
+          <div><small>{titulo}</small><b>{texto}</b></div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -96,7 +100,7 @@ export function LoginPage() {
             {indo ? 'Abrindo o Google…' : 'Entrar com Google'}
           </button>
           {erro && <p className="login-erro" role="alert">{erro}</p>}
-          <p className="login-rodape">🔒 Só você vê os seus dados.</p>
+          <p className="login-rodape"><Lock aria-hidden="true" />Só você vê os seus dados.</p>
         </section>
       </div>
     </main>

@@ -1,5 +1,5 @@
 import {
-  CalendarCheck, ChevronLeft, ChevronRight, CreditCard, LayoutGrid, LogOut, Moon, Plus, SlidersHorizontal, Sun, Target, Users,
+  CalendarCheck, CalendarClock, ChevronLeft, FileSpreadsheet, HandCoins, PiggyBank, Receipt, UserPlus, ChevronRight, CreditCard, LayoutGrid, LogOut, Moon, Plus, SlidersHorizontal, Sun, Target, Users,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
@@ -65,13 +65,13 @@ export function SeletorTema({ comRotulo = true }: { comRotulo?: boolean }) {
 // ---------- menu Adicionar ----------
 
 const ITENS_ADICIONAR = [
-  ['lanc', '💳', 'Lançamento no cartão'],
-  ['conta', '🗓️', 'Conta fixa'],
-  ['me_deve', '🤝', 'Alguém me deve'],
-  ['eu_devo', '🧾', 'Eu devo a alguém'],
-  ['meta', '🐷', 'Meta'],
-  ['pessoa', '🙋', 'Pessoa'],
-  ['import', '📄', 'Importar planilha'],
+  ['lanc', CreditCard, 'Lançamento no cartão'],
+  ['conta', CalendarClock, 'Conta fixa'],
+  ['me_deve', HandCoins, 'Alguém me deve'],
+  ['eu_devo', Receipt, 'Eu devo a alguém'],
+  ['meta', PiggyBank, 'Meta'],
+  ['pessoa', UserPlus, 'Pessoa'],
+  ['import', FileSpreadsheet, 'Importar planilha'],
 ] as const
 
 function MenuAdicionar() {
@@ -86,10 +86,10 @@ function MenuAdicionar() {
         </button>
       </MenuGatilho>
       <MenuConteudo>
-        {ITENS_ADICIONAR.map(([tipo, emoji, rotulo]) => (
+        {ITENS_ADICIONAR.map(([tipo, Icone, rotulo]) => (
           // setTimeout: deixa o menu fechar antes de abrir o modal (o foco não briga entre os dois)
           <MenuItem key={tipo} onSelect={() => setTimeout(() => adicionar(tipo), 0)}>
-            <span className="e">{emoji}</span>
+            <Icone className="e" aria-hidden="true" />
             {rotulo}
           </MenuItem>
         ))}
@@ -160,7 +160,10 @@ export function Shell() {
           <div className="grow" />
           <MenuAdicionar />
         </header>
-        <Outlet />
+        {/* key: a tela (e o mês) entram animadas a cada troca */}
+        <div key={pathname + mes} className="pagina">
+          <Outlet />
+        </div>
       </main>
 
       {/* Celular: abas fixas embaixo, no lugar da barra lateral */}

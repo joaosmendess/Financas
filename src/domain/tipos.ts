@@ -76,6 +76,7 @@ export interface Divida {
 
 export interface Meta {
   id: string
+  /** Chave do ícone (ver domain/icones.ts). A coluna se chama emoji por histórico. */
   emoji: string
   nome: string
   alvo_centavos: Centavos

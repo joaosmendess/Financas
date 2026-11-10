@@ -1,0 +1,103 @@
+/* Animações do app e estilo dos ícones que substituíram os emojis.
+   Tudo é desligado por prefers-reduced-motion no fim do arquivo. */
+
+@layer components {
+  /* ---------- ícones no lugar dos emojis ---------- */
+  .illus2{position:absolute;right:20px;top:16px;display:grid;place-items:center;width:58px;height:58px;border-radius:18px;
+    transform:rotate(-6deg);pointer-events:none;animation:flutua 6s ease-in-out infinite}
+  .illus2 svg{width:28px;height:28px}
+  .tom-verde{background:var(--green-soft);color:var(--green)}
+  .tom-azul{background:var(--blue-soft);color:var(--blue)}
+  .tom-rosa{background:color-mix(in srgb,var(--pink) 14%,var(--surface));color:var(--pink)}
+  .tom-laranja{background:color-mix(in srgb,var(--itau) 14%,var(--surface));color:var(--itau)}
+  .tom-ambar{background:var(--amber-soft);color:var(--amber)}
+  .menu svg.e{width:17px;height:17px;color:var(--muted);flex:none}
+  .rdx-item[data-highlighted] svg.e{color:var(--blue)}
+  .meta .ico svg{width:18px;height:18px;color:var(--blue)}
+  .banner-ico{width:20px;height:20px;flex:none;color:var(--blue)}
+  .drop-ico{width:34px;height:34px;color:var(--blue);margin:0 auto}
+  .vinc-ico{display:inline-block;width:15px;height:15px;vertical-align:-2px;margin-right:4px}
+  .vinc-ico.alerta{color:var(--amber)}
+  .vinc-ico.ok{color:var(--green)}
+  .catrow .n{display:flex;align-items:center;gap:7px}
+  .cat-ico{width:15px;height:15px;flex:none;color:var(--muted)}
+
+  /* seletor de ícone das metas */
+  .field.icones{border:0;padding:0;margin:0 0 12px;min-width:0}
+  .field.icones legend{font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;padding:0}
+  .field.icones [role="radiogroup"]{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px}
+  .field.icones [role="radio"]{display:grid;place-items:center;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);
+    transition:background .15s,color .15s,border-color .15s,transform .12s}
+  .field.icones [role="radio"] svg{width:18px;height:18px}
+  .field.icones [role="radio"]:hover{color:var(--ink)}
+  .field.icones [role="radio"]:active{transform:scale(.94)}
+  .field.icones [role="radio"][aria-checked="true"]{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+
+  /* ---------- entrada das telas e dos cards ---------- */
+  .pagina{animation:sobe .45s cubic-bezier(.2,.7,.2,1) both}
+  .colL > *,.colR > *,.cols > *,.stats > *,.vhead,.tablewrap{animation:sobe .5s cubic-bezier(.2,.7,.2,1) both}
+  .colL > :nth-child(2),.colR > :nth-child(2),.cols > :nth-child(2),.stats > :nth-child(2){animation-delay:.06s}
+  .colL > :nth-child(3),.colR > :nth-child(3),.cols > :nth-child(3),.stats > :nth-child(3){animation-delay:.12s}
+  .colL > :nth-child(n+4),.cols > :nth-child(n+4),.stats > :nth-child(n+4){animation-delay:.18s}
+  .colR > *{animation-delay:.08s}
+  .pair > *:nth-child(2){animation:sobe .5s .1s cubic-bezier(.2,.7,.2,1) both}
+  .list li{animation:aparece .35s ease-out both}
+
+  /* cards sobem de leve ao passar o mouse (só onde existe mouse) */
+  @media (hover:hover){
+    .card{transition:box-shadow .25s ease,transform .25s ease}
+    .card:hover{box-shadow:0 1px 2px rgba(20,24,32,.04),0 10px 28px rgba(20,24,32,.08)}
+    .stat{transition:transform .2s ease}
+    .stat:hover{transform:translateY(-2px)}
+  }
+
+  /* ---------- barras crescendo ---------- */
+  .stack i,.split i{transform-origin:left;animation:cresce .8s cubic-bezier(.2,.7,.2,1) both;transition:flex-grow .6s cubic-bezier(.2,.7,.2,1)}
+  .stack i:nth-child(2),.split i:nth-child(2){animation-delay:.08s}
+  .stack i:nth-child(3),.split i:nth-child(3){animation-delay:.16s}
+  .stack i:nth-child(4){animation-delay:.24s}
+  .stack i:nth-child(5){animation-delay:.32s}
+  .bar i{transform-origin:left;animation:cresce .9s .15s cubic-bezier(.2,.7,.2,1) both;transition:width .6s cubic-bezier(.2,.7,.2,1)}
+
+  /* ---------- toques ---------- */
+  .btn,.chip,.iconbtn,.check,.dono,.tabs [role="tab"],.cc3-olho,.cc3-virar{transition:background .15s,color .15s,border-color .15s,transform .12s,box-shadow .2s,filter .15s}
+  .btn:active:not(:disabled),.chip:active,.iconbtn:active,.cc3-virar:active{transform:scale(.96)}
+  .btn.primary:hover{box-shadow:0 6px 16px color-mix(in srgb,var(--blue) 30%,transparent)}
+  .check[aria-checked="true"]{animation:estala .32s cubic-bezier(.3,1.6,.5,1)}
+  .check svg{transition:opacity .15s,transform .2s}
+  .check[aria-checked="false"] svg{transform:scale(.5)}
+  li.done .name,li.done .val{transition:color .25s}
+  .chip[aria-pressed="true"]{animation:estala .3s cubic-bezier(.3,1.6,.5,1)}
+
+  /* aba ativa do celular */
+  .tabbar a svg{transition:background .25s,color .2s,width .25s}
+  .tabbar a{transition:color .2s}
+  .tabbar a:active svg{transform:scale(.9)}
+  .tabbar .badge{animation:estala .4s cubic-bezier(.3,1.6,.5,1)}
+
+  /* conteúdo das abas (Me devem / Eu devo) */
+  [role="tabpanel"]{animation:aparece .3s ease-out}
+
+  /* ---------- carregando ---------- */
+  .esqueleto{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .esqueleto .card{display:flex;flex-direction:column;gap:12px;min-height:170px}
+  .esqueleto i,.esqueleto-linhas i{display:block;height:12px;border-radius:8px;
+    background:linear-gradient(90deg,var(--surface-2) 25%,color-mix(in srgb,var(--line) 70%,var(--surface)) 50%,var(--surface-2) 75%);
+    background-size:200% 100%;animation:brilho 1.3s ease-in-out infinite}
+  .esqueleto i.alto{height:34px}
+  .esqueleto-linhas{display:flex;flex-direction:column;gap:14px;padding:6px 0}
+  .esqueleto-linhas i{height:34px}
+}
+
+@keyframes sobe{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes aparece{from{opacity:0}to{opacity:1}}
+@keyframes cresce{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes estala{0%{transform:scale(.8)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes flutua{0%,100%{translate:0 0}50%{translate:0 -5px}}
+@keyframes brilho{from{background-position:100% 0}to{background-position:-100% 0}}
+
+/* Quem pediu menos movimento no sistema não vê nenhuma animação (o estado final aparece direto). */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-delay:0s !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;scroll-behavior:auto !important}
+}

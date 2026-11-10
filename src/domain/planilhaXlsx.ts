@@ -24,11 +24,11 @@ export function modeloMetas(): ArrayBuffer {
   const wb = utils.book_new()
   const ws = utils.aoa_to_sheet([
     ['Metas e reserva'],
-    ['Emoji', 'Meta', 'Alvo', 'Guardado', 'Por mês', 'Prazo', 'Dia'],
-    ['🛟', 'Reserva de emergência', 11000, 2400, 700, '10/2027', 10],
-    ['🏠', 'Entrada do apartamento', 40000, 3500, 600, '12/2028', 10],
+    ['Meta', 'Alvo', 'Guardado', 'Por mês', 'Prazo', 'Dia'],
+    ['Reserva de emergência', 11000, 2400, 700, '10/2027', 10],
+    ['Entrada do apartamento', 40000, 3500, 600, '12/2028', 10],
   ])
-  ws['!cols'] = [{ wch: 7 }, { wch: 28 }, { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 6 }]
+  ws['!cols'] = [{ wch: 28 }, { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 6 }]
   utils.book_append_sheet(wb, ws, 'Metas')
   return write(wb, { type: 'array', bookType: 'xlsx' }) as ArrayBuffer
 }

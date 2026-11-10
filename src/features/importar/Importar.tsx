@@ -1,6 +1,8 @@
 // Importar planilha: escolher arquivo → prévia (mês, pessoas, vínculos, contas) → gravar.
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { CircleCheck, FileSpreadsheet, TriangleAlert } from 'lucide-react'
+import { IconeDaMeta } from '@/components/icones'
 import { useDialogo } from '@/components/Dialogo'
 import { ModalTitulo } from '@/components/ui/dialog'
 import { useToast } from '@/components/Toast'
@@ -79,7 +81,7 @@ export function Importar({ mes, foco }: { mes: Mes; foco?: 'metas' }) {
           void escolher(e.dataTransfer.files[0])
         }}
       >
-        <div style={{ fontSize: 30 }}>📄</div>
+        <FileSpreadsheet className="drop-ico" aria-hidden="true" />
         <div style={{ margin: '6px 0 10px' }}>{lendo ? 'Lendo a planilha…' : 'Arraste o arquivo aqui'}</div>
         <button type="button" className="btn primary" disabled={lendo} onClick={() => input.current?.click()}>
           Escolher arquivo
@@ -305,7 +307,11 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
               return (
                 <li key={v.divida} style={{ flexWrap: 'wrap' }}>
                   <span className="name" style={{ whiteSpace: 'normal' }}>
-                    {v.tipo === 'diferente' ? '⚠️ ' : '✓ '}
+                    {v.tipo === 'diferente' ? (
+                      <TriangleAlert className="vinc-ico alerta" aria-label="Confira" />
+                    ) : (
+                      <CircleCheck className="vinc-ico ok" aria-label="Ligada" />
+                    )}
                     {d.descricao}
                     <small>
                       {d.pessoa_nome} · {formatar(d.valor_centavos)} → {l.descricao} {l.parcela ?? ''} · {formatar(l.valor_centavos)}
@@ -386,7 +392,7 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
                   }
                 />
                 <span className="grow">
-                  {m.emoji ?? '🎯'} {m.nome}
+                  <IconeDaMeta chave={m.emoji} className="vinc-ico" /> {m.nome}
                   {existe ? ' (atualiza a existente)' : ''}
                   <span className="lbl" style={{ display: 'block' }}>
                     {formatar(m.atual_centavos)} de {formatar(m.alvo_centavos)}

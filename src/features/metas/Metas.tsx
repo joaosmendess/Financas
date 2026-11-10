@@ -1,6 +1,8 @@
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { BotaoIcone } from '@/components/BotaoIcone'
 import { Confirmar, useDialogo } from '@/components/Dialogo'
+import { IconeDaMeta } from '@/components/icones'
+import { Esqueleto } from '@/components/Esqueleto'
 import { Valor } from '@/components/Valor'
 import { useExcluirMeta } from '@/data/mutacoes'
 import { useMetas } from '@/data/consultas'
@@ -29,7 +31,7 @@ export function Metas() {
         <button type="button" className="btn primary" onClick={() => abrir(<FormMeta />)}><Plus strokeWidth={2.4} />Meta</button>
       </div>
       {isPending ? (
-        <div className="card lbl" role="status">Carregando…</div>
+        <Esqueleto cards={2} />
       ) : metas.length ? (
         <div className="cols">
           {metas.map((m) => {
@@ -37,7 +39,7 @@ export function Metas() {
             return (
               <div key={m.id} className="card">
                 <div className="between">
-                  <h2 className="row"><span className="meta"><span className="ico">{m.emoji || '🎯'}</span></span>{m.nome}</h2>
+                  <h2 className="row"><span className="meta"><span className="ico"><IconeDaMeta chave={m.emoji} /></span></span>{m.nome}</h2>
                   <div className="acts">
                     <BotaoIcone rotulo="Editar" onClick={() => abrir(<FormMeta meta={m} />)}><Pencil /></BotaoIcone>
                     <BotaoIcone rotulo="Excluir" onClick={() =>

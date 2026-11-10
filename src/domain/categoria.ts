@@ -3,22 +3,21 @@
 
 export interface CategoriaInfo {
   nome: string
-  emoji: string
 }
 
 export const CATEGORIAS: readonly CategoriaInfo[] = [
-  { nome: 'Restaurante', emoji: '🍽️' },
-  { nome: 'Alimentação', emoji: '🥪' },
-  { nome: 'Supermercado', emoji: '🛒' },
-  { nome: 'Transporte', emoji: '🚗' },
-  { nome: 'Saúde', emoji: '💊' },
-  { nome: 'Educação', emoji: '🎓' },
-  { nome: 'Assinaturas', emoji: '📺' },
-  { nome: 'Compras', emoji: '🛍️' },
-  { nome: 'Vestuário', emoji: '👕' },
-  { nome: 'Serviços', emoji: '🔧' },
-  { nome: 'Lazer', emoji: '🎬' },
-  { nome: 'Outros', emoji: '📦' },
+  { nome: 'Restaurante' },
+  { nome: 'Alimentação' },
+  { nome: 'Supermercado' },
+  { nome: 'Transporte' },
+  { nome: 'Saúde' },
+  { nome: 'Educação' },
+  { nome: 'Assinaturas' },
+  { nome: 'Compras' },
+  { nome: 'Vestuário' },
+  { nome: 'Serviços' },
+  { nome: 'Lazer' },
+  { nome: 'Outros' },
 ]
 
 export const OUTROS = 'Outros'
@@ -58,7 +57,3 @@ export function categoria(descricao: string): string {
   return OUTROS
 }
 
-export function emojiDaCategoria(nome: string): string {
-  const n = normalizar(nome)
-  return CATEGORIAS.find((c) => normalizar(c.nome) === n)?.emoji ?? '📦'
-}

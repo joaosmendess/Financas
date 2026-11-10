@@ -1,6 +1,7 @@
 // Formulário genérico dos modais, no estilo do `form()` do protótipo.
 import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { parseValor } from '@/domain/dinheiro'
+import { ICONE_META } from './icones'
 import { useDialogo } from './Dialogo'
 import { ModalTitulo } from './ui/dialog'
 import { useToast } from './Toast'
@@ -11,6 +12,7 @@ export type Campo =
   | { nome: string; rotulo: string; tipo: 'number'; min?: number; max?: number; obrigatorio?: boolean; ajuda?: string }
   | { nome: string; rotulo: string; tipo: 'select'; opcoes: readonly (readonly [string, string])[]; ajuda?: string }
   | { nome: string; rotulo: string; tipo: 'check' }
+  | { nome: string; rotulo: string; tipo: 'icone' }
 
 /** Valores lidos do formulário. Dinheiro vem em centavos; números como number; check como boolean. */
 export type Valores = Record<string, string | number | boolean | null>
@@ -90,6 +92,27 @@ export function Formulario(props: {
         {props.campos.map((c) => {
           const id = `${prefixo}-${c.nome}`
           const v = valores[c.nome]
+          if (c.tipo === 'icone')
+            return (
+              <fieldset key={c.nome} className="field icones">
+                <legend>{c.rotulo}</legend>
+                <div role="radiogroup" aria-label={c.rotulo}>
+                  {Object.entries(ICONE_META).map(([chave, { rotulo, Icone }]) => (
+                    <button
+                      key={chave}
+                      type="button"
+                      role="radio"
+                      aria-checked={v === chave}
+                      aria-label={rotulo}
+                      title={rotulo}
+                      onClick={() => mudar(c.nome, chave)}
+                    >
+                      <Icone />
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            )
           if (c.tipo === 'check')
             return (
               <label key={c.nome} className="switch">

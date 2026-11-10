@@ -16,7 +16,7 @@ export const divida = (o: Partial<Divida> = {}): Divida => ({
   recebido: false, direcao: 'me_deve', ...o,
 })
 export const meta = (o: Partial<Meta> = {}): Meta => ({
-  id: id('m'), emoji: '🎯', nome: 'Meta', alvo_centavos: 100000, atual_centavos: 0,
+  id: id('m'), emoji: 'alvo', nome: 'Meta', alvo_centavos: 100000, atual_centavos: 0,
   mensal_centavos: 10000, prazo: null, dia: 10, ...o,
 })
 export const pessoa = (o: Partial<Pessoa> = {}): Pessoa => ({ id: id('p'), nome: 'Fulano', cor: '#2563EB', ...o })

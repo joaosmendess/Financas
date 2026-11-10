@@ -250,10 +250,10 @@ describe('metas', () => {
     const wb = planilhaDezembro()
     utils.book_append_sheet(wb, utils.aoa_to_sheet([
       ['Metas e reserva'],
-      ['Emoji', 'Meta', 'Alvo', 'Guardado', 'Por mês', 'Prazo', 'Dia'],
-      ['🛟', 'Reserva de emergência', 11000, 2400, 700, D('2027-10-01'), 10],
+      ['Ícone', 'Meta', 'Alvo', 'Guardado', 'Por mês', 'Prazo', 'Dia'],
+      ['reserva', 'Reserva de emergência', 11000, 2400, 700, D('2027-10-01'), 10],
       [null, 'Entrada do apartamento', 'R$ 40.000,00', '3.500,00', '600', '12/2028', null],
-      ['🏃', 'Viagem Recife 2027', 2500, 450, 250, 'mai/2027', 5],
+      ['corrida', 'Viagem Recife 2027', 2500, 450, 250, 'mai/2027', 5],
       [null, 'Ideia sem valor', null, null, null, null, null],
       [null, 'Total', 53500, 6350, 1550],
     ]), 'Metas')
@@ -263,9 +263,9 @@ describe('metas', () => {
 
   it('lê a aba de metas com prazo em vários formatos', () => {
     expect(l.metas).toEqual([
-      { emoji: '🛟', nome: 'Reserva de emergência', alvo_centavos: 1100000, atual_centavos: 240000, mensal_centavos: 70000, prazo: '2027-10', dia: 10 },
+      { emoji: 'reserva', nome: 'Reserva de emergência', alvo_centavos: 1100000, atual_centavos: 240000, mensal_centavos: 70000, prazo: '2027-10', dia: 10 },
       { emoji: null, nome: 'Entrada do apartamento', alvo_centavos: 4000000, atual_centavos: 350000, mensal_centavos: 60000, prazo: '2028-12', dia: null },
-      { emoji: '🏃', nome: 'Viagem Recife 2027', alvo_centavos: 250000, atual_centavos: 45000, mensal_centavos: 25000, prazo: '2027-05', dia: 5 },
+      { emoji: null, nome: 'Viagem Recife 2027', alvo_centavos: 250000, atual_centavos: 45000, mensal_centavos: 25000, prazo: '2027-05', dia: 5 },
     ])
   })
   it('metas não atrapalham o resto da leitura', () => {
@@ -291,15 +291,15 @@ describe('metas', () => {
     expect(lerPlanilha(deWorkbook(planilhaDezembro())).metas).toEqual([])
   })
   it('monta metas novas e atualiza as que já existem pelo nome', () => {
-    const existente = meta({ id: 'm1', nome: 'RESERVA DE EMERGENCIA', emoji: '💰', atual_centavos: 100000, dia: 15, prazo: '2027-12' })
+    const existente = meta({ id: 'm1', nome: 'RESERVA DE EMERGENCIA', emoji: 'cofre', atual_centavos: 100000, dia: 15, prazo: '2027-12' })
     const m = montarImportacao({
       leitura: l, mes: '2026-12', vinculos: [], pessoaId: () => null, metas: [0, 2], metasExistentes: [existente],
     })
     expect(m.metas.atualizar).toEqual([
-      { ...existente, nome: 'Reserva de emergência', alvo_centavos: 1100000, atual_centavos: 240000, mensal_centavos: 70000, prazo: '2027-10', emoji: '🛟', dia: 10 },
+      { ...existente, nome: 'Reserva de emergência', alvo_centavos: 1100000, atual_centavos: 240000, mensal_centavos: 70000, prazo: '2027-10', emoji: 'reserva', dia: 10 },
     ])
     expect(m.metas.novas).toEqual([
-      { nome: 'Viagem Recife 2027', alvo_centavos: 250000, atual_centavos: 45000, mensal_centavos: 25000, prazo: '2027-05', emoji: '🏃', dia: 5 },
+      { nome: 'Viagem Recife 2027', alvo_centavos: 250000, atual_centavos: 45000, mensal_centavos: 25000, prazo: '2027-05', emoji: 'alvo', dia: 5 },
     ])
   })
   it('o modelo para baixar é lido de volta pelo importador', () => {

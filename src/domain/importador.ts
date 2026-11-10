@@ -9,6 +9,7 @@
 // Não importa o SheetJS, para ele só ser baixado quando alguém abrir a importação.
 import { CATEGORIAS, categoria, normalizar } from './categoria'
 import { parseValor } from './dinheiro'
+import { iconeMeta, ICONE_META_PADRAO, ICONES_META } from './icones'
 import { MESES } from './meses'
 import { lerParcela, normalizarParcela, parcelaNaDescricao } from './parcelas'
 import {
@@ -360,7 +361,7 @@ function lerMetas(wb: Planilha): MetaLida[] {
       if (cNome === null || (cAlvo === null && cAtual === null)) continue
       const cMensal = coluna(cab, /mensal|por mes|aporte|guardar/, [cAtual ?? -1])
       const cPrazo = coluna(cab, /prazo|ate quando|^data|^quando/)
-      const cEmoji = coluna(cab, /emoji|icone/)
+      const cEmoji = coluna(cab, /emoji|icone/) // opcional: chave de ícone (casa, viagem…)
       const cDia = coluna(cab, /^dia/)
       for (const r of sec.dados) {
         const nome = texto(celula(r, cNome))
@@ -369,8 +370,9 @@ function lerMetas(wb: Planilha): MetaLida[] {
         const atual = parseValor(celula(r, cAtual)) ?? 0
         if (alvo <= 0 && atual <= 0) continue
         const dia = Number(celula(r, cDia))
+        const icone = normalizar(texto(celula(r, cEmoji)))
         out.push({
-          emoji: texto(celula(r, cEmoji)) || null,
+          emoji: (ICONES_META as readonly string[]).includes(icone) ? iconeMeta(icone) : null,
           nome,
           alvo_centavos: Math.max(alvo, 0),
           atual_centavos: Math.max(atual, 0),
@@ -564,8 +566,8 @@ export function montarImportacao(args: {
       prazo: m.prazo,
     }
     if (existente)
-      metas.atualizar.push({ ...existente, ...base, emoji: m.emoji ?? existente.emoji, dia: m.dia ?? existente.dia, prazo: m.prazo ?? existente.prazo })
-    else metas.novas.push({ ...base, emoji: m.emoji ?? '🎯', dia: m.dia ?? 10 })
+      metas.atualizar.push({ ...existente, ...base, emoji: m.emoji ?? iconeMeta(existente.emoji), dia: m.dia ?? existente.dia, prazo: m.prazo ?? existente.prazo })
+    else metas.novas.push({ ...base, emoji: m.emoji ?? ICONE_META_PADRAO, dia: m.dia ?? 10 })
   }
   return { lancamentos: [...lancs, ...extras], dividas, contas, metas }
 }

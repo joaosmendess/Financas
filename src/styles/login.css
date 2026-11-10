@@ -17,14 +17,16 @@
   .login-vitrine{position:relative;height:300px;margin-top:28px;max-width:520px}
   .login-cartao{position:absolute;left:0;top:18px;width:300px;aspect-ratio:1.586;border-radius:18px;padding:18px 20px;color:#fff;overflow:hidden;
     display:flex;flex-direction:column;justify-content:space-between;
-    background:linear-gradient(135deg,#FF8A1F 0%,var(--itau) 45%,#C85A00 100%);box-shadow:0 24px 48px rgba(236,112,0,.28);
+    background:radial-gradient(120% 140% at 0% 0%,#3B6CF5 0%,#1E3A8A 55%,#0F1E4A 100%);box-shadow:0 24px 48px rgba(30,58,138,.32);
     transform:rotate(-7deg);animation:login-entra-cartao .9s .1s cubic-bezier(.2,.8,.2,1) both,login-flutua 6s 1s ease-in-out infinite}
   .login-cartao-brilho{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.32) 45%,transparent 60%);
     transform:translateX(-120%);animation:login-reflexo 5.5s 1.4s ease-in-out infinite}
-  .login-cartao-logo{background:#fff;color:#0A3D91;font-weight:800;font-size:14px;border-radius:7px;padding:3px 8px;font-style:italic;letter-spacing:-.03em}
-  .login-cartao-pill{background:rgba(255,255,255,.22);font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
-  .login-cartao-tier{text-align:center;letter-spacing:.42em;font-weight:700;font-size:13px}
-  .login-bola{display:block;width:26px;height:26px;border-radius:50%}
+  .login-cartao-marca{font-size:12px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;opacity:.9}
+  .login-cartao-nfc{width:20px;height:20px;transform:rotate(90deg);opacity:.85}
+  .login-cartao-numero{font-size:16px;font-weight:600;letter-spacing:.14em;opacity:.95}
+  .login-cartao small{display:block;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
+  .login-cartao b{font-size:12.5px;letter-spacing:.12em}
+  .login-bola{display:block;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.85)}
 
   .login-ficha{position:absolute;display:flex;align-items:center;gap:10px;padding:10px 14px 10px 10px;border-radius:16px;
     background:var(--surface);box-shadow:0 12px 30px rgba(20,24,32,.12);border:1px solid var(--line);
@@ -34,7 +36,8 @@
   .login-ficha:nth-of-type(4){left:200px;top:232px}
   .login-ficha small{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
   .login-ficha b{font-size:13px}
-  .login-ficha-ico{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:var(--surface-2);font-size:18px}
+  .login-ficha-ico{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:var(--blue-soft);color:var(--blue)}
+  .login-ficha-ico svg{width:18px;height:18px}
 
   .login-card{background:var(--surface);border-radius:24px;padding:32px 28px;text-align:center;box-shadow:0 1px 2px rgba(20,24,32,.04),0 18px 50px rgba(20,24,32,.10);
     border:1px solid var(--line);animation:login-sobe .7s .12s cubic-bezier(.2,.7,.2,1) both}
@@ -50,7 +53,8 @@
   .login-google:disabled{opacity:.75;cursor:progress}
   .login-spinner{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--blue);animation:login-gira .7s linear infinite}
   .login-erro{margin:12px 0 0;color:var(--red);font-size:13px;animation:login-treme .35s ease}
-  .login-rodape{margin:20px 0 0;color:var(--faint);font-size:12px}
+  .login-rodape{display:flex;align-items:center;justify-content:center;gap:6px;margin:20px 0 0;color:var(--faint);font-size:12px}
+  .login-rodape svg{width:13px;height:13px}
 
   .carregando{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:13px}
   .carregando .login-logo{margin-bottom:10px;animation:login-pulsa 1.2s ease-in-out infinite}
@@ -64,9 +68,10 @@
   .login-texto h1{font-size:clamp(28px,8vw,36px)}
   .login-vitrine{height:200px;margin:22px auto 0;max-width:340px}
   .login-cartao{width:230px;left:50%;top:6px;margin-left:-150px;padding:14px 16px}
-  .login-cartao-tier{font-size:11px}
+  .login-cartao-numero{font-size:13px}
   .login-ficha{padding:7px 10px 7px 7px;gap:8px}
-  .login-ficha-ico{width:28px;height:28px;font-size:15px;border-radius:9px}
+  .login-ficha-ico{width:28px;height:28px;border-radius:9px}
+  .login-ficha-ico svg{width:15px;height:15px}
   .login-ficha b{display:none}
   .login-ficha:nth-of-type(2){left:auto;right:0;top:0}
   .login-ficha:nth-of-type(3){left:auto;right:-6px;top:78px}

@@ -1,4 +1,4 @@
-import { Pencil, Plus, Split, Trash2 } from 'lucide-react'
+import { Pencil, Pin, Plus, Split, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { BotaoIcone } from '@/components/BotaoIcone'
 import { Confirmar, useDialogo } from '@/components/Dialogo'
@@ -77,7 +77,7 @@ export function Lancamentos() {
 
       {projetados.length > 0 && (
         <div className="banner">
-          <span>📌</span>
+          <Pin className="banner-ico" aria-hidden="true" />
           <div className="grow">
             Ainda não tem lançamentos em {nomeMesAno(d.mes)}. Abaixo estão as {projetados.length} parcelas que já caem nesta fatura.
           </div>
@@ -89,7 +89,7 @@ export function Lancamentos() {
 
       <div className="card tablewrap">
         {d.carregando ? (
-          <div className="lbl" role="status">Carregando…</div>
+          <div className="esqueleto-linhas" role="status" aria-label="Carregando">{Array.from({ length: 6 }).map((_, i) => <i key={i} />)}</div>
         ) : itens.length ? (
           <table className="tabela-lanc">
             <thead>

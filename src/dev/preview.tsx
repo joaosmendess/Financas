@@ -51,8 +51,8 @@ const contas = [
   ['CLARO - DADOS MOVEIS', 61.16, 5], ['BRISANET - INTERNET', 100, 10], ['DAS - MEI', 99, 20], ['Empréstimo energia solar', 490, 15],
 ].map(([nome, v, dia]) => ({ id: id(), nome: nome as string, valor_centavos: Math.round((v as number) * 100), dia: dia as number, ativa: true }))
 const metas = [
-  { id: id(), emoji: '🛟', nome: 'Reserva de emergência', alvo_centavos: 1100000, atual_centavos: 240000, mensal_centavos: 70000, prazo: '2027-10', dia: 10 },
-  { id: id(), emoji: '🏃', nome: 'Viagem Recife 2027', alvo_centavos: 250000, atual_centavos: 45000, mensal_centavos: 25000, prazo: '2027-05', dia: 10 },
+  { id: id(), emoji: 'reserva', nome: 'Reserva de emergência', alvo_centavos: 1100000, atual_centavos: 240000, mensal_centavos: 70000, prazo: '2027-10', dia: 10 },
+  { id: id(), emoji: 'viagem', nome: 'Viagem Recife 2027', alvo_centavos: 250000, atual_centavos: 45000, mensal_centavos: 25000, prazo: '2027-05', dia: 10 },
 ]
 const dividas = [
   { id: id(), pessoa_id: STHE, descricao: 'Ingresso do show', valor_centavos: 18000, mes: '2026-12', recebido: false, direcao: 'eu_devo' },
