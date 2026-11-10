@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './componentes.css';
 
 /* Tokens do protótipo (referencia/financas.html). Tema claro é o padrão;
    o escuro segue o sistema, a menos que o usuário force data-theme. */
@@ -114,6 +115,13 @@
   }
   button {
     cursor: pointer;
+  }
+  /* O protótipo conta com o negrito padrão dos títulos, que o reset do Tailwind remove. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 700;
   }
   :focus-visible {
     outline: 2px solid var(--blue);

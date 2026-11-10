@@ -3,6 +3,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import { AuthProvider } from './auth/AuthProvider'
+import { DialogoProvider } from './components/Dialogo'
+import { ToastProvider } from './components/Toast'
 import { queryClient } from './lib/queryClient'
 import './styles/index.css'
 import App from './App'
@@ -12,7 +14,11 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
-          <App />
+          <ToastProvider>
+            <DialogoProvider>
+              <App />
+            </DialogoProvider>
+          </ToastProvider>
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>
