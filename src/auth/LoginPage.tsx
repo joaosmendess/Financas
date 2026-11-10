@@ -1,5 +1,4 @@
-import { Lock, Wifi } from 'lucide-react'
-import { Imagem3D } from '@/components/icones'
+import { HandCoins, Lock, PiggyBank, Wallet, Wifi } from 'lucide-react'
 import { useState } from 'react'
 import { Navigate } from 'react-router'
 import { Carregando } from './RequireAuth'
@@ -19,10 +18,10 @@ function LogoGoogle() {
 /** Vitrine decorativa: um cartão genérico flutuando e fichas do app entrando em sequência. */
 function Vitrine() {
   const fichas = [
-    { imagem: 'carteira', titulo: 'Saldo previsto', texto: 'sobra no fim do mês' },
-    { imagem: 'dinheiro', titulo: 'Quem me deve', texto: 'compras do cartão e Pix' },
-    { imagem: 'reserva', titulo: 'Metas e reserva', texto: 'quanto guardar por mês' },
-  ] as const
+    { Icone: Wallet, titulo: 'Saldo previsto', texto: 'sobra no fim do mês' },
+    { Icone: HandCoins, titulo: 'Quem me deve', texto: 'compras do cartão e Pix' },
+    { Icone: PiggyBank, titulo: 'Metas e reserva', texto: 'quanto guardar por mês' },
+  ]
   return (
     <div className="login-vitrine" aria-hidden="true">
       <div className="login-cartao">
@@ -47,9 +46,9 @@ function Vitrine() {
           </span>
         </div>
       </div>
-      {fichas.map(({ imagem, titulo, texto }, i) => (
+      {fichas.map(({ Icone, titulo, texto }, i) => (
         <div key={titulo} className="login-ficha" style={{ ['--i' as string]: i }}>
-          <span className="login-ficha-ico"><Imagem3D nome={imagem} /></span>
+          <span className="login-ficha-ico"><Icone /></span>
           <div><small>{titulo}</small><b>{texto}</b></div>
         </div>
       ))}

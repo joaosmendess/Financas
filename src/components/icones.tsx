@@ -3,7 +3,6 @@ import {
   CarFront, Clapperboard, GraduationCap, Gift, HeartPulse, House, Laptop, Package, PartyPopper, PiggyBank, Pill, Plane,
   Sandwich, Shield, Shirt, ShoppingBag, ShoppingCart, Target, TrendingUp, Tv, Utensils, Wrench, type LucideIcon,
 } from 'lucide-react'
-import { useState } from 'react'
 import { normalizar } from '@/domain/categoria'
 import { iconeMeta, type IconeMeta } from '@/domain/icones'
 
@@ -47,28 +46,11 @@ export function IconeDaCategoria({ nome, className }: { nome: string; className?
   return <Icone className={className} strokeWidth={2} aria-hidden="true" />
 }
 
-export type NomeIlustracao = 'carteira' | 'calendario' | 'dinheiro' | 'cartao' | 'reserva'
-
-/** Ilustração 3D (public/ilustracoes, 3dicons CC0). */
-export function Imagem3D({ nome, className }: { nome: NomeIlustracao; className?: string }) {
-  return <img src={`/ilustracoes/${nome}.webp`} alt="" width={192} height={192} decoding="async" draggable={false} className={className} />
-}
-
-/**
- * O "desenho" grande do canto dos cards (no protótipo era um emoji inclinado).
- * Mostra a ilustração 3D; se a imagem falhar, cai para o ícone com fundo colorido.
- */
-export function Ilustracao({ imagem, Icone, tom }: { imagem: NomeIlustracao; Icone: LucideIcon; tom: 'verde' | 'azul' | 'rosa' | 'laranja' | 'ambar' }) {
-  const [falhou, setFalhou] = useState(false)
-  if (falhou)
-    return (
-      <div className={`illus2 tom-${tom}`} aria-hidden="true">
-        <Icone strokeWidth={1.9} />
-      </div>
-    )
+/** O "desenho" grande do canto dos cards (no protótipo era um emoji inclinado). */
+export function Ilustracao({ Icone, tom }: { Icone: LucideIcon; tom: 'verde' | 'azul' | 'rosa' | 'laranja' | 'ambar' }) {
   return (
-    <div className="illus3" aria-hidden="true">
-      <img src={`/ilustracoes/${imagem}.webp`} alt="" width={192} height={192} decoding="async" draggable={false} onError={() => setFalhou(true)} />
+    <div className={`illus2 tom-${tom}`} aria-hidden="true">
+      <Icone strokeWidth={1.9} />
     </div>
   )
 }
