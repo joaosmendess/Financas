@@ -1,4 +1,5 @@
 import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { BotaoIcone } from '@/components/BotaoIcone'
 import { Confirmar, useDialogo } from '@/components/Dialogo'
 import { Valor } from '@/components/Valor'
 import { useExcluirMeta } from '@/data/mutacoes'
@@ -38,12 +39,8 @@ export function Metas() {
                 <div className="between">
                   <h2 className="row"><span className="meta"><span className="ico">{m.emoji || '🎯'}</span></span>{m.nome}</h2>
                   <div className="acts">
-                    <button type="button" className="iconbtn" aria-label="Editar" onClick={() => abrir(<FormMeta meta={m} />)}><Pencil /></button>
-                    <button
-                      type="button"
-                      className="iconbtn"
-                      aria-label="Excluir"
-                      onClick={() =>
+                    <BotaoIcone rotulo="Editar" onClick={() => abrir(<FormMeta meta={m} />)}><Pencil /></BotaoIcone>
+                    <BotaoIcone rotulo="Excluir" onClick={() =>
                         abrir(
                           <Confirmar
                             titulo="Excluir meta"
@@ -52,10 +49,7 @@ export function Metas() {
                             aoConfirmar={() => excluir.mutateAsync(m.id)}
                           />,
                         )
-                      }
-                    >
-                      <Trash2 />
-                    </button>
+                      }><Trash2 /></BotaoIcone>
                   </div>
                 </div>
                 <div style={{ marginTop: 12 }}>

@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router'
 import { AuthProvider } from './auth/AuthProvider'
 import { DialogoProvider } from './components/Dialogo'
 import { ToastProvider } from './components/Toast'
+import { DicasProvider } from './components/ui/tooltip'
 import { queryClient } from './lib/queryClient'
 import './styles/index.css'
 import App from './App'
@@ -15,9 +16,11 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <BrowserRouter>
           <ToastProvider>
+            <DicasProvider>
             <DialogoProvider>
               <App />
             </DialogoProvider>
+            </DicasProvider>
           </ToastProvider>
         </BrowserRouter>
       </AuthProvider>

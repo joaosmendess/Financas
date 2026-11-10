@@ -2,6 +2,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useDialogo } from '@/components/Dialogo'
+import { ModalTitulo } from '@/components/ui/dialog'
 import { useToast } from '@/components/Toast'
 import { useConfig, useContasFixas, useLancamentos, useMetas, usePessoas } from '@/data/consultas'
 import { useImportarPlanilha } from '@/data/mutacoes'
@@ -59,7 +60,7 @@ export function Importar({ mes, foco }: { mes: Mes; foco?: 'metas' }) {
 
   return (
     <>
-      <h3>Importar planilha</h3>
+      <ModalTitulo>Importar planilha</ModalTitulo>
       <p>
         {foco === 'metas'
           ? 'Envie uma planilha (.xlsx) com uma tabela de metas: Meta, Alvo, Guardado, Por mês e Prazo. Mostro tudo antes de gravar.'
@@ -167,7 +168,7 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
   if (!leitura.lancamentos.length && !leitura.dividas.length && !leitura.metas.length && !leitura.contas.length) {
     return (
       <>
-        <h3>Nada para importar</h3>
+        <ModalTitulo>Nada para importar</ModalTitulo>
         <p>Não encontrei lançamentos, dívidas, contas nem metas em “{arquivo}”.</p>
         {leitura.avisos.map((a) => <p key={a}>{a}</p>)}
         <div className="mfoot"><button type="button" className="btn primary" onClick={fechar}>Entendi</button></div>
@@ -223,7 +224,7 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
 
   return (
     <>
-      <h3>Conferir importação</h3>
+      <ModalTitulo>Conferir importação</ModalTitulo>
       {temFatura ? (
       <p>
         “{arquivo}” vai para a fatura de{' '}

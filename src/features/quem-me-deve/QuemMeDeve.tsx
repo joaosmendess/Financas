@@ -1,6 +1,7 @@
 import { Check, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Avatar } from '@/components/Avatar'
+import { BotaoIcone } from '@/components/BotaoIcone'
 import { Confirmar, useDialogo } from '@/components/Dialogo'
 import { Valor } from '@/components/Valor'
 import { useAtualizarDivida, useAtualizarLancamento, useExcluirDivida, useReceberTudo } from '@/data/mutacoes'
@@ -56,17 +57,10 @@ export function QuemMeDeve() {
         <span className="val num">{formatar(p.valor_centavos)}</span>
         {p.origem === 'divida' && divida && (
           <div className="acts">
-            <button type="button" className="iconbtn" aria-label="Editar" onClick={() => abrir(<FormDivida mes={d.mes} direcao={aba} divida={divida} />)}><Pencil /></button>
-            <button
-              type="button"
-              className="iconbtn"
-              aria-label="Excluir"
-              onClick={() =>
+            <BotaoIcone rotulo="Editar" onClick={() => abrir(<FormDivida mes={d.mes} direcao={aba} divida={divida} />)}><Pencil /></BotaoIcone>
+            <BotaoIcone rotulo="Excluir" onClick={() =>
                 abrir(<Confirmar titulo="Excluir dívida" texto="Essa dívida será removida." rotulo="Excluir" aoConfirmar={() => excluirDiv.mutateAsync(p.id)} />)
-              }
-            >
-              <Trash2 />
-            </button>
+              }><Trash2 /></BotaoIcone>
           </div>
         )}
       </li>

@@ -1,6 +1,7 @@
 // Modais de cadastro/edição. Cada um usa o Formulario genérico e uma mutação.
 import { Avatar } from '@/components/Avatar'
 import { useDialogo } from '@/components/Dialogo'
+import { ModalTitulo } from '@/components/ui/dialog'
 import { erroValidacao, Formulario, type Valores } from '@/components/Formulario'
 import { usePessoas } from '@/data/consultas'
 import { Importar } from '@/features/importar/Importar'
@@ -145,7 +146,7 @@ function SemPessoas() {
   const { abrir, fechar } = useDialogo()
   return (
     <>
-      <h3>Cadastre uma pessoa</h3>
+      <ModalTitulo>Cadastre uma pessoa</ModalTitulo>
       <p>Para registrar quem te deve ou a quem você deve, cadastre a pessoa primeiro.</p>
       <div className="mfoot">
         <button type="button" className="btn" onClick={fechar}>Cancelar</button>

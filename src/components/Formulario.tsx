@@ -2,6 +2,7 @@
 import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { parseValor } from '@/domain/dinheiro'
 import { useDialogo } from './Dialogo'
+import { ModalTitulo } from './ui/dialog'
 import { useToast } from './Toast'
 
 export type Campo =
@@ -83,7 +84,7 @@ export function Formulario(props: {
 
   return (
     <>
-      <h3>{props.titulo}</h3>
+      <ModalTitulo>{props.titulo}</ModalTitulo>
       {props.descricao && <p>{props.descricao}</p>}
       <form onSubmit={enviar} noValidate>
         {props.campos.map((c) => {

@@ -1,20 +1,22 @@
 import {
-  ChevronLeft, ChevronRight, CreditCard, LayoutGrid, LogOut, Moon, Plus, SlidersHorizontal, Sun, Target, Users,
+  CalendarCheck, ChevronLeft, ChevronRight, CreditCard, LayoutGrid, LogOut, Moon, Plus, SlidersHorizontal, Sun, Target, Users,
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { useAuth, useUsuario } from '@/auth/AuthProvider'
+import { BotaoIcone } from '@/components/BotaoIcone'
+import { Menu, MenuConteudo, MenuGatilho, MenuItem } from '@/components/ui/dropdown-menu'
 import { useDadosDoMes } from '@/data/useDadosDoMes'
 import { useAdicionar } from '@/features/formularios/formularios'
 import { nomeMes, somarMeses } from '@/domain/meses'
 import { useMes } from '@/state/mes'
 
 const NAV = [
-  { to: '/', rotulo: 'Visão geral', Icone: LayoutGrid },
-  { to: '/lancamentos', rotulo: 'Lançamentos', Icone: CreditCard },
-  { to: '/quem-me-deve', rotulo: 'Quem me deve', Icone: Users },
-  { to: '/metas', rotulo: 'Metas e reserva', Icone: Target },
-  { to: '/ajustes', rotulo: 'Ajustes', Icone: SlidersHorizontal },
+  { to: '/', rotulo: 'Visão geral', curto: 'Início', Icone: LayoutGrid },
+  { to: '/lancamentos', rotulo: 'Lançamentos', curto: 'Lançamentos', Icone: CreditCard },
+  { to: '/quem-me-deve', rotulo: 'Quem me deve', curto: 'Me deve', Icone: Users },
+  { to: '/metas', rotulo: 'Metas e reserva', curto: 'Metas', Icone: Target },
+  { to: '/ajustes', rotulo: 'Ajustes', curto: 'Ajustes', Icone: SlidersHorizontal },
 ] as const
 
 // ---------- tema ----------
@@ -29,7 +31,8 @@ function lerTema(): Tema {
   }
 }
 
-function SeletorTema() {
+/** Claro/escuro. Fica na barra lateral e, no celular, em Ajustes. */
+export function SeletorTema({ comRotulo = true }: { comRotulo?: boolean }) {
   const [tema, setTema] = useState<Tema>(lerTema)
   const [sistemaEscuro, setSistemaEscuro] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches)
   useEffect(() => {
@@ -50,7 +53,7 @@ function SeletorTema() {
   const escuro = tema ? tema === 'dark' : sistemaEscuro
   return (
     <div className="theme">
-      <span>Tema</span>
+      {comRotulo && <span>Tema</span>}
       <div className="seg" role="group" aria-label="Tema">
         <button type="button" aria-label="Claro" aria-pressed={!escuro} onClick={() => escolher('light')}><Sun /></button>
         <button type="button" aria-label="Escuro" aria-pressed={escuro} onClick={() => escolher('dark')}><Moon /></button>
@@ -74,41 +77,24 @@ const ITENS_ADICIONAR = [
 function MenuAdicionar() {
   const { mes } = useMes()
   const adicionar = useAdicionar(mes)
-  const [aberto, setAberto] = useState(false)
-  const caixa = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!aberto) return
-    const fora = (e: MouseEvent) => !caixa.current?.contains(e.target as Node) && setAberto(false)
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setAberto(false)
-    document.addEventListener('mousedown', fora)
-    document.addEventListener('keydown', esc)
-    return () => {
-      document.removeEventListener('mousedown', fora)
-      document.removeEventListener('keydown', esc)
-    }
-  }, [aberto])
   return (
-    <div className="addwrap" ref={caixa}>
-      <button type="button" className="btn primary" aria-haspopup="true" aria-expanded={aberto} onClick={() => setAberto(!aberto)}>
-        <Plus strokeWidth={2.4} />Adicionar
-      </button>
-      <div className={`menu${aberto ? ' open' : ''}`} role="menu">
+    <Menu modal={false}>
+      <MenuGatilho asChild>
+        <button type="button" className="btn primary" aria-label="Adicionar">
+          <Plus strokeWidth={2.4} />
+          <span className="rotulo-add">Adicionar</span>
+        </button>
+      </MenuGatilho>
+      <MenuConteudo>
         {ITENS_ADICIONAR.map(([tipo, emoji, rotulo]) => (
-          <button
-            key={tipo}
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              setAberto(false)
-              adicionar(tipo)
-            }}
-          >
+          // setTimeout: deixa o menu fechar antes de abrir o modal (o foco não briga entre os dois)
+          <MenuItem key={tipo} onSelect={() => setTimeout(() => adicionar(tipo), 0)}>
             <span className="e">{emoji}</span>
             {rotulo}
-          </button>
+          </MenuItem>
         ))}
-      </div>
-    </div>
+      </MenuConteudo>
+    </Menu>
   )
 }
 
@@ -123,6 +109,8 @@ export function Shell() {
 
   useEffect(() => window.scrollTo(0, 0), [pathname])
 
+  const badge = (to: string) => (to === '/quem-me-deve' && pendentes.length > 0 ? pendentes.length : null)
+
   return (
     <div className="app">
       <aside className="side" aria-label="Navegação">
@@ -136,7 +124,7 @@ export function Shell() {
             <NavLink key={to} to={{ pathname: to, search }} end={to === '/'}>
               <Icone strokeWidth={2} />
               {rotulo}
-              {to === '/quem-me-deve' && pendentes.length > 0 && <span className="badge num">{pendentes.length}</span>}
+              {badge(to) && <span className="badge num">{badge(to)}</span>}
             </NavLink>
           ))}
         </nav>
@@ -152,29 +140,39 @@ export function Shell() {
             <b className="truncate">{usuario.primeiroNome}</b>
             <small><span className="dot" style={{ background: 'var(--green-2)' }} />Salvo na sua conta</small>
           </div>
-          <button type="button" className="iconbtn sair" aria-label="Sair" title="Sair" onClick={sair}><LogOut /></button>
+          <BotaoIcone rotulo="Sair" className="sair" onClick={sair}><LogOut /></BotaoIcone>
         </div>
       </aside>
 
       <main className="min-w-0">
         <header className="top">
-          <button type="button" className="iconbtn" aria-label="Mês anterior" onClick={() => setMes(somarMeses(mes, -1))}>
-            <ChevronLeft strokeWidth={2.2} />
-          </button>
-          <button type="button" className="iconbtn" aria-label="Próximo mês" onClick={() => setMes(somarMeses(mes, 1))}>
-            <ChevronRight strokeWidth={2.2} />
-          </button>
+          <BotaoIcone rotulo="Mês anterior" onClick={() => setMes(somarMeses(mes, -1))}><ChevronLeft strokeWidth={2.2} /></BotaoIcone>
+          <BotaoIcone rotulo="Próximo mês" onClick={() => setMes(somarMeses(mes, 1))}><ChevronRight strokeWidth={2.2} /></BotaoIcone>
           <h1 className="month">
             {nomeMes(mes).replace(/^./, (c) => c.toUpperCase())} <span>{mes.slice(0, 4)}</span>
           </h1>
           {mes !== aberto && (
-            <button type="button" className="btn sm" onClick={() => setMes(aberto)}>Fatura aberta</button>
+            <button type="button" className="btn sm" aria-label="Ir para a fatura aberta" onClick={() => setMes(aberto)}>
+              <CalendarCheck />
+              <span className="rotulo-add">Fatura aberta</span>
+            </button>
           )}
           <div className="grow" />
           <MenuAdicionar />
         </header>
         <Outlet />
       </main>
+
+      {/* Celular: abas fixas embaixo, no lugar da barra lateral */}
+      <nav className="tabbar" aria-label="Navegação">
+        {NAV.map(({ to, curto, Icone }) => (
+          <NavLink key={to} to={{ pathname: to, search }} end={to === '/'}>
+            <Icone strokeWidth={2} aria-hidden="true" />
+            <span>{curto}</span>
+            {badge(to) && <span className="badge num" aria-label={`${badge(to)} pendentes`}>{badge(to)}</span>}
+          </NavLink>
+        ))}
+      </nav>
     </div>
   )
 }

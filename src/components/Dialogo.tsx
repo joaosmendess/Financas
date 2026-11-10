@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { Modal, ModalTitulo } from './ui/dialog'
 
 interface DialogoApi {
   abrir: (conteudo: ReactNode) => void
@@ -7,42 +8,20 @@ interface DialogoApi {
 
 const DialogoCtx = createContext<DialogoApi>({ abrir: () => {}, fechar: () => {} })
 
-/** Um modal por vez, como no protótipo. */
+/**
+ * Um modal por vez, como no protótipo. Usa o Dialog do shadcn/ui (Radix): foco preso,
+ * Esc e clique fora fecham, rolagem travada e foco devolvido a quem abriu.
+ */
 export function DialogoProvider({ children }: { children: ReactNode }) {
   const [conteudo, setConteudo] = useState<ReactNode>(null)
-  const modal = useRef<HTMLDivElement>(null)
-  const anterior = useRef<HTMLElement | null>(null)
-
-  const fechar = useCallback(() => {
-    setConteudo(null)
-    anterior.current?.focus?.()
-  }, [])
-  const abrir = useCallback((c: ReactNode) => {
-    anterior.current = document.activeElement as HTMLElement | null
-    setConteudo(c)
-  }, [])
-
-  useEffect(() => {
-    if (!conteudo) return
-    const t = setTimeout(() => modal.current?.querySelector<HTMLElement>('input,select,textarea,button')?.focus(), 30)
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && fechar()
-    document.addEventListener('keydown', esc)
-    return () => {
-      clearTimeout(t)
-      document.removeEventListener('keydown', esc)
-    }
-  }, [conteudo, fechar])
-
+  const fechar = useCallback(() => setConteudo(null), [])
+  const abrir = useCallback((c: ReactNode) => setConteudo(c), [])
   return (
     <DialogoCtx.Provider value={{ abrir, fechar }}>
       {children}
-      <div className={`backdrop${conteudo ? ' open' : ''}`} onMouseDown={(e) => e.target === e.currentTarget && fechar()}>
-        {conteudo && (
-          <div className="modal" role="dialog" aria-modal="true" ref={modal}>
-            {conteudo}
-          </div>
-        )}
-      </div>
+      <Modal aberto={conteudo !== null} aoFechar={fechar}>
+        {conteudo}
+      </Modal>
     </DialogoCtx.Provider>
   )
 }
@@ -55,7 +34,7 @@ export function Confirmar(props: { titulo: string; texto: ReactNode; rotulo: str
   const [indo, setIndo] = useState(false)
   return (
     <>
-      <h3>{props.titulo}</h3>
+      <ModalTitulo>{props.titulo}</ModalTitulo>
       <p>{props.texto}</p>
       <div className="mfoot">
         <button type="button" className="btn" onClick={fechar}>Cancelar</button>

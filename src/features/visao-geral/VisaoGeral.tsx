@@ -262,7 +262,7 @@ function CardCartao({ d }: { d: Dados }) {
   const mm = d.mes.slice(5, 7)
   const tier = d.config.cartao_nome.split(' ').slice(1).join(' ') || 'PLATINUM'
   const max = Math.max(...d.proximas.map((c) => c.total), 1)
-  const pts = d.proximas.map((c, i) => [((i + 0.5) / 3) * 100, 66 - (c.total / max) * 30] as const)
+  const pts = d.proximas.map((c, i) => [((i + 0.5) / 3) * 100, 72 - (c.total / max) * 24] as const)
   const projetada = d.projetada && d.total > 0
   return (
     <section className="card cartao">

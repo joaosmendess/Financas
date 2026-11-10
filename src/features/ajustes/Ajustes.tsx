@@ -2,6 +2,7 @@ import { LogOut, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '@/auth/AuthProvider'
 import { Avatar } from '@/components/Avatar'
+import { BotaoIcone } from '@/components/BotaoIcone'
 import { Confirmar, useDialogo } from '@/components/Dialogo'
 import { useToast } from '@/components/Toast'
 import {
@@ -11,6 +12,7 @@ import { useApagarTudo, useExcluirConta, useExcluirPessoa, useSalvarConfig, useS
 import { FormConta, FormPessoa, useAdicionar } from '@/features/formularios/formularios'
 import { formatar, paraCampo, parseValor } from '@/domain/dinheiro'
 import { CONFIG_PADRAO } from '@/domain/tipos'
+import { SeletorTema } from '@/layout/Shell'
 import { useMes } from '@/state/mes'
 
 const dd = (n: number) => String(n).padStart(2, '0')
@@ -100,12 +102,8 @@ function CardContas() {
               <span className="name">{c.nome}<small>todo dia {dd(c.dia)}{c.ativa ? '' : ' · pausada'}</small></span>
               <span className="val num">{formatar(c.valor_centavos)}</span>
               <div className="acts">
-                <button type="button" className="iconbtn" aria-label="Editar" onClick={() => abrir(<FormConta conta={c} />)}><Pencil /></button>
-                <button
-                  type="button"
-                  className="iconbtn"
-                  aria-label="Excluir"
-                  onClick={() =>
+                <BotaoIcone rotulo="Editar" onClick={() => abrir(<FormConta conta={c} />)}><Pencil /></BotaoIcone>
+                <BotaoIcone rotulo="Excluir" onClick={() =>
                     abrir(
                       <Confirmar
                         titulo="Excluir conta fixa"
@@ -114,10 +112,7 @@ function CardContas() {
                         aoConfirmar={() => excluir.mutateAsync(c.id)}
                       />,
                     )
-                  }
-                >
-                  <Trash2 />
-                </button>
+                  }><Trash2 /></BotaoIcone>
               </div>
             </li>
           ))
@@ -150,12 +145,8 @@ function CardPessoas() {
                 {p.apelidos?.length ? <small>também: {p.apelidos.join(', ')}</small> : null}
               </span>
               <div className="acts">
-                <button type="button" className="iconbtn" aria-label="Editar" onClick={() => abrir(<FormPessoa pessoa={p} />)}><Pencil /></button>
-                <button
-                  type="button"
-                  className="iconbtn"
-                  aria-label="Excluir"
-                  onClick={() =>
+                <BotaoIcone rotulo="Editar" onClick={() => abrir(<FormPessoa pessoa={p} />)}><Pencil /></BotaoIcone>
+                <BotaoIcone rotulo="Excluir" onClick={() =>
                     abrir(
                       <Confirmar
                         titulo="Excluir pessoa"
@@ -164,10 +155,7 @@ function CardPessoas() {
                         aoConfirmar={() => excluir.mutateAsync(p.id)}
                       />,
                     )
-                  }
-                >
-                  <Trash2 />
-                </button>
+                  }><Trash2 /></BotaoIcone>
               </div>
             </li>
           ))
@@ -244,6 +232,15 @@ export function Ajustes() {
         <CardRendaCartao />
         <CardContas />
         <CardPessoas />
+        <div className="card">
+          <div className="between">
+            <div>
+              <h2>Aparência</h2>
+              <p className="lbl" style={{ margin: '4px 0 0' }}>Tema claro ou escuro neste aparelho.</p>
+            </div>
+            <SeletorTema comRotulo={false} />
+          </div>
+        </div>
         <CardDados />
       </div>
     </>

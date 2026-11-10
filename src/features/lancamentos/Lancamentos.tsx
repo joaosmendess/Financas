@@ -1,5 +1,6 @@
 import { Pencil, Plus, Split, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { BotaoIcone } from '@/components/BotaoIcone'
 import { Confirmar, useDialogo } from '@/components/Dialogo'
 import { useToast } from '@/components/Toast'
 import { useAtualizarLancamento, useExcluirLancamento, useInserirLancamentos } from '@/data/mutacoes'
@@ -132,9 +133,9 @@ export function Lancamentos() {
                   <td className="col-acts">
                     {!l.projetado && (
                       <div className="acts">
-                        <button type="button" className="iconbtn" aria-label="Editar" onClick={() => abrir(<FormLancamento mes={d.mes} lancamento={l} />)}><Pencil /></button>
-                        <button type="button" className="iconbtn" aria-label="Dividir com alguém" title="Dividir com alguém" onClick={() => abrir(<FormDividir lancamento={l} />)}><Split /></button>
-                        <button type="button" className="iconbtn" aria-label="Excluir" onClick={() => excluirLanc(l)}><Trash2 /></button>
+                        <BotaoIcone rotulo="Editar" onClick={() => abrir(<FormLancamento mes={d.mes} lancamento={l} />)}><Pencil /></BotaoIcone>
+                        <BotaoIcone rotulo="Dividir com alguém" onClick={() => abrir(<FormDividir lancamento={l} />)}><Split /></BotaoIcone>
+                        <BotaoIcone rotulo="Excluir" onClick={() => excluirLanc(l)}><Trash2 /></BotaoIcone>
                       </div>
                     )}
                   </td>

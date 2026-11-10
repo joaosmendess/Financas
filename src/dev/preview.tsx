@@ -8,6 +8,7 @@ import { HashRouter, Route, Routes } from 'react-router'
 import { AuthProvider } from '@/auth/AuthProvider'
 import { DialogoProvider } from '@/components/Dialogo'
 import { ToastProvider } from '@/components/Toast'
+import { DicasProvider } from '@/components/ui/tooltip'
 import { chaves } from '@/data/consultas'
 import { Ajustes } from '@/features/ajustes/Ajustes'
 import { Lancamentos } from '@/features/lancamentos/Lancamentos'
@@ -71,6 +72,7 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <HashRouter>
           <ToastProvider>
+            <DicasProvider>
             <DialogoProvider>
               <Routes>
                 <Route element={<Shell />}>
@@ -82,6 +84,7 @@ createRoot(document.getElementById('root')!).render(
                 </Route>
               </Routes>
             </DialogoProvider>
+            </DicasProvider>
           </ToastProvider>
         </HashRouter>
       </AuthProvider>
