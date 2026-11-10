@@ -346,3 +346,45 @@ details summary{cursor:pointer;color:var(--muted);font-weight:600;font-size:12.5
     .legend{grid-template-columns:repeat(3,minmax(0,1fr))}
   }
 }
+
+/* Cartão de crédito com giro 3D (adaptado do Shadcn Space card-15) */
+@layer components {
+  .cc3{position:relative;margin-top:16px;width:100%;max-width:420px;aspect-ratio:1.586;container-type:inline-size;perspective:1200px}
+  .cc3-giro{position:absolute;inset:0;font-size:4.3cqw;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+  .cc3-giro.virado{transform:rotateY(180deg)}
+  .cc3-face{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:6% 6.5%;border-radius:16px;overflow:hidden;
+    color:#fff;cursor:pointer;-webkit-backface-visibility:hidden;backface-visibility:hidden;
+    background:linear-gradient(135deg,#FF8A1F 0%,var(--itau) 45%,#C85A00 100%);box-shadow:0 10px 24px rgba(236,112,0,.25)}
+  .cc3-verso{transform:rotateY(180deg);padding:0;justify-content:flex-start}
+  .cc3-brilho{position:absolute;top:-40%;right:-20%;width:70%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.09);pointer-events:none}
+  .cc3-linha{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:.6em}
+  .cc3 small{display:block;font-size:.72em;font-weight:600;opacity:.82;line-height:1.3}
+  .cc3 b{font-size:1em;font-weight:700;line-height:1.3}
+  .cc3 .logo{background:#fff;color:#0A3D91;font-weight:800;font-size:1.1em;border-radius:.45em;padding:.15em .5em;font-style:italic;letter-spacing:-.03em}
+  .cc3-valor{text-align:right}
+  .cc3-valor > span{display:flex;align-items:center;justify-content:flex-end;gap:.35em}
+  .cc3-olho{display:grid;place-items:center;width:1.9em;height:1.9em;border:0;border-radius:99px;background:rgba(0,0,0,.16);color:#fff}
+  .cc3-olho:hover{background:rgba(0,0,0,.28)}
+  .cc3-olho svg{width:1.05em;height:1.05em}
+  .cc3-chip{width:2.9em;height:auto;flex:none}
+  .cc3-tier{flex:1;text-align:center;letter-spacing:.42em;font-weight:700;font-size:.95em;opacity:.95}
+  .cc3-nfc{width:1.4em;height:1.4em;transform:rotate(90deg);opacity:.85;flex:none}
+  .cc3-rodape{align-items:flex-end;gap:.9em}
+  .cc3-rodape > div:first-child{flex:1}
+  .cc3-bandeira{display:flex;flex:none}
+  .cc3-bandeira i{width:1.9em;height:1.9em;border-radius:50%}
+  .cc3-tarja{height:17%;margin-top:7%;background:rgba(0,0,0,.78);flex:none}
+  .cc3-verso-conteudo{display:flex;flex-direction:column;gap:.7em;padding:5% 6.5%;flex:1}
+  .cc3-assinatura{display:flex;align-items:flex-end;gap:.8em}
+  .cc3-assinatura > span{flex:1;display:flex;height:2.3em;border-radius:3px;overflow:hidden;background:#fff}
+  .cc3-assinatura > span i{flex:1}
+  .cc3-assinatura > span i:nth-child(odd){background:#E2E6EC}
+  .cc3-assinatura > div{text-align:center}
+  .cc3-assinatura b{display:block;margin-top:.15em;padding:.25em .55em;border-radius:3px;background:#fff;color:#14161B}
+  .cc3-nota{margin-top:auto}
+  .cc3-virar{position:absolute;right:10px;bottom:-14px;z-index:2;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;
+    border:1px solid var(--line);background:var(--surface);color:var(--muted);box-shadow:var(--shadow)}
+  .cc3-virar:hover{color:var(--ink)}
+  .cc3-virar svg{width:15px;height:15px}
+}
+@media (prefers-reduced-motion:reduce){.cc3-giro{transition:none}}

@@ -5,6 +5,7 @@ import { useUsuario } from '@/auth/AuthProvider'
 import { Avatar, Ponto } from '@/components/Avatar'
 import { Confirmar, useDialogo } from '@/components/Dialogo'
 import { Valor } from '@/components/Valor'
+import { CartaoCredito } from '@/components/ui/cartao-credito'
 import { useAlternarPagamento, useReceberTudo } from '@/data/mutacoes'
 import { useDadosDoMes } from '@/data/useDadosDoMes'
 import { FormRenda, useAdicionar } from '@/features/formularios/formularios'
@@ -246,21 +247,12 @@ function CardDeve({ d }: { d: Dados }) {
 
 // ---------- Cartão ----------
 
-function ChipCartao() {
-  return (
-    <svg className="chip-svg" viewBox="0 0 34 26" aria-hidden="true">
-      <rect x=".5" y=".5" width="33" height="25" rx="5" fill="#F5D58A" stroke="#C9A24E" />
-      <path d="M0 9h11M0 17h11M23 9h11M23 17h11M11 0v26M23 0v26" stroke="#C9A24E" />
-    </svg>
-  )
-}
-
 function CardCartao({ d }: { d: Dados }) {
   const adicionar = useAdicionar(d.mes)
+  const eu = useUsuario()
   const { search } = useLocation()
   const aberta = faturaAberta(d.mes, d.config.dia_fechamento, new Date())
   const mm = d.mes.slice(5, 7)
-  const tier = d.config.cartao_nome.split(' ').slice(1).join(' ') || 'PLATINUM'
   const max = Math.max(...d.proximas.map((c) => c.total), 1)
   const pts = d.proximas.map((c, i) => [((i + 0.5) / 3) * 100, 72 - (c.total / max) * 24] as const)
   const projetada = d.projetada && d.total > 0
@@ -274,20 +266,17 @@ function CardCartao({ d }: { d: Dados }) {
         <Link className="btn sm" to={{ pathname: '/lancamentos', search }}>Ver lançamentos</Link>
         <button type="button" className="btn sm" onClick={() => adicionar('import')}>Importar planilha</button>
       </div>
-      <div className="cc">
-        <div className="between">
-          <span className="logo">itaú</span>
-          <span className="pill">{aberta ? 'Aberta' : 'Fechada'}</span>
-        </div>
-        <div className="tier">{tier.toUpperCase()}</div>
-        <div className="between" style={{ alignItems: 'flex-end' }}>
-          <div><ChipCartao /></div>
-          <div style={{ textAlign: 'right' }}>
-            <small>Fecha · Vence</small>
-            <b className="num">{dd(d.config.dia_fechamento)}/{mm} · {dd(d.config.dia_vencimento)}/{mm}</b>
-          </div>
-        </div>
-      </div>
+      <CartaoCredito
+        nome={d.config.cartao_nome}
+        titular={eu.nome}
+        aberta={aberta}
+        fecha={`${dd(d.config.dia_fechamento)}/${mm}`}
+        vence={`${dd(d.config.dia_vencimento)}/${mm}`}
+        mes={nomeMes(d.mes)}
+        fatura={d.total}
+        minhaParte={d.minha}
+        dosOutros={d.outros}
+      />
       <div className="sec">Próximas faturas</div>
       <div className="nexts">
         {d.proximas.map((c, i) => (
