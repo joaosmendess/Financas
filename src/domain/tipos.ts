@@ -29,6 +29,8 @@ export interface Pessoa {
   id: string
   nome: string
   cor: string
+  /** Outros nomes (ex.: "José Valter"), usados na importação. */
+  apelidos?: string[]
 }
 
 export interface Lancamento {
