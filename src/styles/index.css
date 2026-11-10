@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './componentes.css';
+@import './login.css';
 
 /* Tokens do protótipo (referencia/financas.html). Tema claro é o padrão;
    o escuro segue o sistema, a menos que o usuário force data-theme. */

@@ -49,7 +49,7 @@
 .menu .e{width:20px;text-align:center}
 
 /* Cards */
-.grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,.95fr);gap:16px;align-items:start}
+.painel{display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,.95fr);gap:16px;align-items:start}
 .colL,.colR{display:flex;flex-direction:column;gap:16px;min-width:0}
 .pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 a.btn{text-decoration:none;color:inherit}
@@ -215,7 +215,7 @@ details summary{cursor:pointer;color:var(--muted);font-weight:600;font-size:12.5
 .summary-list li{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)}
 
 @media (max-width:1180px){
-  .grid{grid-template-columns:1fr}
+  .painel{grid-template-columns:1fr}
   .colR{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
 }
 @media (max-width:820px){

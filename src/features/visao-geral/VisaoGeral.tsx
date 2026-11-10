@@ -407,7 +407,7 @@ export function VisaoGeral() {
   const adicionar = useAdicionar(d.mes)
   if (d.carregando) return <div className="card lbl" role="status">Carregando…</div>
   return (
-    <div className="grid">
+    <div className="painel">
       {d.vazio && (
         <div className="banner" style={{ gridColumn: '1/-1', background: 'var(--blue-soft)', margin: 0 }}>
           <span>👋</span>

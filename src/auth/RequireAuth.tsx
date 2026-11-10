@@ -4,8 +4,9 @@ import { useAuth } from './AuthProvider'
 
 export function Carregando() {
   return (
-    <div className="grid min-h-dvh place-items-center text-muted" role="status">
-      Carregando…
+    <div className="carregando" role="status">
+      <span className="login-logo pulsar" aria-hidden="true">J</span>
+      <span>Carregando…</span>
     </div>
   )
 }
