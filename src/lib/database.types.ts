@@ -1,172 +1,109 @@
-// Tipos do banco no formato do `supabase gen types typescript`.
-// Regenere com: npm run db:types
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.18"
   }
   public: {
     Tables: {
       config: {
         Row: {
-          user_id: string
-          renda_centavos: number
           cartao_nome: string
+          created_at: string
           dia_fechamento: number
           dia_vencimento: number
-          created_at: string
+          renda_centavos: number
+          user_id: string
         }
         Insert: {
-          user_id?: string
-          renda_centavos?: number
           cartao_nome?: string
+          created_at?: string
           dia_fechamento?: number
           dia_vencimento?: number
-          created_at?: string
+          renda_centavos?: number
+          user_id?: string
         }
         Update: {
-          user_id?: string
-          renda_centavos?: number
           cartao_nome?: string
+          created_at?: string
           dia_fechamento?: number
           dia_vencimento?: number
-          created_at?: string
-        }
-        Relationships: []
-      }
-      pessoas: {
-        Row: {
-          id: string
-          user_id: string
-          nome: string
-          cor: string
-          apelidos: string[]
-          created_at: string
-        }
-        Insert: {
-          id?: string
+          renda_centavos?: number
           user_id?: string
-          nome: string
-          cor?: string
-          apelidos?: string[]
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          nome?: string
-          cor?: string
-          apelidos?: string[]
-          created_at?: string
-        }
-        Relationships: []
-      }
-      lancamentos: {
-        Row: {
-          id: string
-          user_id: string
-          mes_fatura: string
-          data_compra: string | null
-          descricao: string
-          valor_centavos: number
-          parcela: string | null
-          categoria: string | null
-          dono: string
-          recebido: boolean
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id?: string
-          mes_fatura: string
-          data_compra?: string | null
-          descricao: string
-          valor_centavos: number
-          parcela?: string | null
-          categoria?: string | null
-          dono?: string
-          recebido?: boolean
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          mes_fatura?: string
-          data_compra?: string | null
-          descricao?: string
-          valor_centavos?: number
-          parcela?: string | null
-          categoria?: string | null
-          dono?: string
-          recebido?: boolean
-          created_at?: string
         }
         Relationships: []
       }
       contas_fixas: {
         Row: {
-          id: string
-          user_id: string
-          nome: string
-          valor_centavos: number
-          dia: number
           ativa: boolean
           created_at: string
+          dia: number
+          id: string
+          nome: string
+          user_id: string
+          valor_centavos: number
         }
         Insert: {
-          id?: string
-          user_id?: string
-          nome: string
-          valor_centavos: number
-          dia?: number
           ativa?: boolean
           created_at?: string
+          dia?: number
+          id?: string
+          nome: string
+          user_id?: string
+          valor_centavos: number
         }
         Update: {
-          id?: string
-          user_id?: string
-          nome?: string
-          valor_centavos?: number
-          dia?: number
           ativa?: boolean
           created_at?: string
+          dia?: number
+          id?: string
+          nome?: string
+          user_id?: string
+          valor_centavos?: number
         }
         Relationships: []
       }
       dividas: {
         Row: {
-          id: string
-          user_id: string
-          pessoa_id: string
-          descricao: string
-          valor_centavos: number
-          mes: string
-          recebido: boolean
-          direcao: string
           created_at: string
+          descricao: string
+          direcao: string
+          id: string
+          mes: string
+          pessoa_id: string
+          recebido: boolean
+          user_id: string
+          valor_centavos: number
         }
         Insert: {
-          id?: string
-          user_id?: string
-          pessoa_id: string
-          descricao: string
-          valor_centavos: number
-          mes: string
-          recebido?: boolean
-          direcao?: string
           created_at?: string
+          descricao: string
+          direcao?: string
+          id?: string
+          mes: string
+          pessoa_id: string
+          recebido?: boolean
+          user_id?: string
+          valor_centavos: number
         }
         Update: {
-          id?: string
-          user_id?: string
-          pessoa_id?: string
-          descricao?: string
-          valor_centavos?: number
-          mes?: string
-          recebido?: boolean
-          direcao?: string
           created_at?: string
+          descricao?: string
+          direcao?: string
+          id?: string
+          mes?: string
+          pessoa_id?: string
+          recebido?: boolean
+          user_id?: string
+          valor_centavos?: number
         }
         Relationships: [
           {
@@ -178,69 +115,138 @@ export type Database = {
           },
         ]
       }
-      metas: {
+      lancamentos: {
         Row: {
-          id: string
-          user_id: string
-          emoji: string
-          nome: string
-          alvo_centavos: number
-          atual_centavos: number
-          mensal_centavos: number
-          prazo: string | null
-          dia: number
+          categoria: string | null
           created_at: string
+          data_compra: string | null
+          descricao: string
+          dono: string
+          id: string
+          mes_fatura: string
+          parcela: string | null
+          recebido: boolean
+          user_id: string
+          valor_centavos: number
         }
         Insert: {
-          id?: string
-          user_id?: string
-          emoji?: string
-          nome: string
-          alvo_centavos: number
-          atual_centavos?: number
-          mensal_centavos?: number
-          prazo?: string | null
-          dia?: number
+          categoria?: string | null
           created_at?: string
+          data_compra?: string | null
+          descricao: string
+          dono?: string
+          id?: string
+          mes_fatura: string
+          parcela?: string | null
+          recebido?: boolean
+          user_id?: string
+          valor_centavos: number
         }
         Update: {
+          categoria?: string | null
+          created_at?: string
+          data_compra?: string | null
+          descricao?: string
+          dono?: string
           id?: string
+          mes_fatura?: string
+          parcela?: string | null
+          recebido?: boolean
           user_id?: string
+          valor_centavos?: number
+        }
+        Relationships: []
+      }
+      metas: {
+        Row: {
+          alvo_centavos: number
+          atual_centavos: number
+          created_at: string
+          dia: number
+          emoji: string
+          id: string
+          mensal_centavos: number
+          nome: string
+          prazo: string | null
+          user_id: string
+        }
+        Insert: {
+          alvo_centavos: number
+          atual_centavos?: number
+          created_at?: string
+          dia?: number
           emoji?: string
-          nome?: string
+          id?: string
+          mensal_centavos?: number
+          nome: string
+          prazo?: string | null
+          user_id?: string
+        }
+        Update: {
           alvo_centavos?: number
           atual_centavos?: number
-          mensal_centavos?: number
-          prazo?: string | null
-          dia?: number
           created_at?: string
+          dia?: number
+          emoji?: string
+          id?: string
+          mensal_centavos?: number
+          nome?: string
+          prazo?: string | null
+          user_id?: string
         }
         Relationships: []
       }
       pagamentos_mes: {
         Row: {
-          id: string
-          user_id: string
-          mes: string
-          item_chave: string
-          pago: boolean
           created_at: string
+          id: string
+          item_chave: string
+          mes: string
+          pago: boolean
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id?: string
-          mes: string
-          item_chave: string
-          pago?: boolean
           created_at?: string
+          id?: string
+          item_chave: string
+          mes: string
+          pago?: boolean
+          user_id?: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          mes?: string
-          item_chave?: string
-          pago?: boolean
           created_at?: string
+          id?: string
+          item_chave?: string
+          mes?: string
+          pago?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pessoas: {
+        Row: {
+          apelidos: string[]
+          cor: string
+          created_at: string
+          id: string
+          nome: string
+          user_id: string
+        }
+        Insert: {
+          apelidos?: string[]
+          cor?: string
+          created_at?: string
+          id?: string
+          nome: string
+          user_id?: string
+        }
+        Update: {
+          apelidos?: string[]
+          cor?: string
+          created_at?: string
+          id?: string
+          nome?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -253,10 +259,7 @@ export type Database = {
         Args: { p_chave: string; p_mes: string }
         Returns: boolean
       }
-      apagar_tudo: {
-        Args: never
-        Returns: undefined
-      }
+      apagar_tudo: { Args: never; Returns: undefined }
       importar_fatura: {
         Args: {
           p_dividas: Json
@@ -266,10 +269,7 @@ export type Database = {
         }
         Returns: Json
       }
-      receber_tudo: {
-        Args: { p_pessoa: string }
-        Returns: undefined
-      }
+      receber_tudo: { Args: { p_pessoa: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
@@ -280,7 +280,125 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database["public"]
-export type Tables<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Row"]
-export type TablesInsert<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Insert"]
-export type TablesUpdate<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Update"]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never) = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never) = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
