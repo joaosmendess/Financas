@@ -1,12 +1,13 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { read, utils, type WorkBook } from 'xlsx'
+import { utils, type WorkBook } from 'xlsx'
 import { pessoa } from './__testes__/fabrica'
 import { somar } from './dinheiro'
 import {
   dataISO, lerPlanilha, mesNoTexto, montarImportacao, parcelaDoTexto, resolverPessoa, sugerirVinculos, type LeituraPlanilha,
 } from './importador'
+import { deWorkbook, lerXlsx } from './planilhaXlsx'
 
 const D = (iso: string) => new Date(`${iso}T00:00:00`) // meia-noite local, como o SheetJS devolve
 
@@ -105,7 +106,7 @@ function planilhaDezembro(opcoes: { parcelaComoData?: boolean } = {}): WorkBook 
 const cents = (r: number) => Math.round(r * 100)
 
 describe('lerPlanilha: lançamentos', () => {
-  const l = lerPlanilha(planilhaDezembro())
+  const l = lerPlanilha(deWorkbook(planilhaDezembro()))
 
   it('acha o mês no título da aba', () => {
     expect(l.mes_detectado).toBe('2026-12')
@@ -122,7 +123,7 @@ describe('lerPlanilha: lançamentos', () => {
     expect(l.lancamentos.find((x) => x.descricao === 'UBER')).toMatchObject({ parcela: null, categoria: 'Transporte' })
   })
   it('trata parcela que o Excel converteu em data', () => {
-    const c = lerPlanilha(planilhaDezembro({ parcelaComoData: true }))
+    const c = lerPlanilha(deWorkbook(planilhaDezembro({ parcelaComoData: true })))
     expect(c.lancamentos.map((x) => x.parcela)).toEqual(l.lancamentos.map((x) => x.parcela))
   })
   it('renda vem de "Minhas despesas", não do "Resumo"', () => {
@@ -131,7 +132,7 @@ describe('lerPlanilha: lançamentos', () => {
 })
 
 describe('lerPlanilha: dívidas e contas', () => {
-  const l = lerPlanilha(planilhaDezembro())
+  const l = lerPlanilha(deWorkbook(planilhaDezembro()))
   const meDeve = l.dividas.filter((d) => d.direcao === 'me_deve')
 
   it('lê os blocos por pessoa', () => {
@@ -165,7 +166,7 @@ describe('lerPlanilha: dívidas e contas', () => {
 })
 
 describe('vincular dívidas às compras', () => {
-  const l = lerPlanilha(planilhaDezembro())
+  const l = lerPlanilha(deWorkbook(planilhaDezembro()))
   const v = sugerirVinculos(l)
   const desc = (i: number | null) => (i === null ? null : l.lancamentos[i]!.descricao)
 
@@ -277,7 +278,7 @@ describe('auxiliares', () => {
   it('planilha sem cabeçalho gera aviso', () => {
     const wb = utils.book_new()
     utils.book_append_sheet(wb, utils.aoa_to_sheet([['nada aqui']]), 'Lançamentos')
-    const l: LeituraPlanilha = lerPlanilha(wb)
+    const l: LeituraPlanilha = lerPlanilha(deWorkbook(wb))
     expect(l.lancamentos).toEqual([])
     expect(l.avisos[0]).toMatch(/cabeçalho/)
   })
@@ -287,8 +288,7 @@ describe('auxiliares', () => {
 const REAL = resolve(import.meta.dirname, '../../referencia/Fatura_Itau_Dezembro2026 (4).xlsx')
 describe.skipIf(!existsSync(REAL))('planilha real de dezembro/2026', () => {
   it('importa com os mesmos totais da planilha', () => {
-    const wb = read(readFileSync(REAL), { type: 'buffer', cellDates: true })
-    const l = lerPlanilha(wb, 'Fatura_Itau_Dezembro2026 (4).xlsx')
+    const l = lerPlanilha(lerXlsx(readFileSync(REAL)), 'Fatura_Itau_Dezembro2026 (4).xlsx')
     expect(l.mes_detectado).toBe('2026-12')
     expect(l.renda_centavos).toBe(640000)
     expect(l.lancamentos).toHaveLength(18)

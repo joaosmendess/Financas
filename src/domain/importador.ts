@@ -5,16 +5,21 @@
 //  * nomes das pessoas são resolvidos pelo cadastro (nome e apelidos), nada fixo no código;
 //  * as dívidas da aba "Quem me deve" que vieram de compras do cartão são LIGADAS a essas compras
 //    (o dono da compra passa a ser a pessoa), para não contar o mesmo valor duas vezes.
-// Tudo aqui é puro: recebe o WorkBook já lido e devolve dados; quem grava é a tela.
-import { utils, type WorkBook, type WorkSheet } from 'xlsx'
+// Tudo aqui é puro: recebe as linhas já lidas (planilhaXlsx.ts) e devolve dados; quem grava é a tela.
+// Não importa o SheetJS, para ele só ser baixado quando alguém abrir a importação.
 import { CATEGORIAS, categoria, normalizar } from './categoria'
 import { parseValor } from './dinheiro'
 import { MESES } from './meses'
 import { lerParcela, normalizarParcela, parcelaNaDescricao } from './parcelas'
 import { EU, type Centavos, type ContaFixa, type DirecaoDivida, type Divida, type Lancamento, type Mes, type Pessoa } from './tipos'
 
-type Celula = string | number | boolean | Date | null
-type Linha = Celula[]
+export type Celula = string | number | boolean | Date | null
+export type Linha = Celula[]
+
+/** A planilha já lida: abas na ordem do arquivo, cada uma como linhas de células. */
+export interface Planilha {
+  abas: { nome: string; linhas: Linha[] }[]
+}
 
 export interface LancamentoLido {
   data_compra: string | null
@@ -56,13 +61,12 @@ export interface LeituraPlanilha {
 
 // ---------- utilidades de leitura ----------
 
-function linhas(ws: WorkSheet | undefined): Linha[] {
-  if (!ws) return []
-  return utils.sheet_to_json<Linha>(ws, { header: 1, raw: true, defval: null, blankrows: false })
+function linhasDa(p: Planilha, nome: string | undefined): Linha[] {
+  return p.abas.find((a) => a.nome === nome)?.linhas ?? []
 }
 
-function acharAba(wb: WorkBook, re: RegExp): string | undefined {
-  return wb.SheetNames.find((n) => re.test(normalizar(n)))
+function acharAba(p: Planilha, re: RegExp): string | undefined {
+  return p.abas.find((a) => re.test(normalizar(a.nome)))?.nome
 }
 
 const preenchidas = (r: Linha) => r.filter((c) => c !== null && String(c).trim() !== '')
@@ -155,10 +159,10 @@ export function mesNoTexto(s: string): Mes | null {
   return `${m[2]}-${String(idx + 1).padStart(2, '0')}`
 }
 
-function detectarMes(wb: WorkBook, nomeArquivo?: string): Mes | null {
-  const ordem = [acharAba(wb, /lancamento/), ...wb.SheetNames].filter((n): n is string => !!n)
+function detectarMes(wb: Planilha, nomeArquivo?: string): Mes | null {
+  const ordem = [acharAba(wb, /lancamento/), ...wb.abas.map((a) => a.nome)].filter((n): n is string => !!n)
   for (const nome of ordem) {
-    for (const r of linhas(wb.Sheets[nome]).slice(0, 6)) {
+    for (const r of linhasDa(wb, nome).slice(0, 6)) {
       for (const c of r) if (ehTexto(c)) {
         const m = mesNoTexto(c)
         if (m) return m
@@ -168,10 +172,10 @@ function detectarMes(wb: WorkBook, nomeArquivo?: string): Mes | null {
   return nomeArquivo ? mesNoTexto(nomeArquivo.replace(/[_.-]/g, ' ')) : null
 }
 
-function detectarRenda(wb: WorkBook): Centavos | null {
+function detectarRenda(wb: Planilha): Centavos | null {
   const ordem = [acharAba(wb, /minhas despesas|meu mes/), acharAba(wb, /resumo/)].filter((n): n is string => !!n)
   for (const nome of ordem) {
-    for (const r of linhas(wb.Sheets[nome])) {
+    for (const r of linhasDa(wb, nome)) {
       const i = r.findIndex((c) => ehTexto(c) && /^(renda|salario)/.test(normalizar(c)))
       if (i < 0) continue
       const n = r.slice(i + 1).find((c): c is number => typeof c === 'number' && c > 0)
@@ -189,10 +193,10 @@ function categoriaLida(valor: Celula, desc: string): string {
   return CATEGORIAS.find((c) => normalizar(c.nome) === normalizar(t))?.nome ?? t
 }
 
-function lerLancamentos(wb: WorkBook, mes: Mes | null, avisos: string[]): LancamentoLido[] {
-  const nome = acharAba(wb, /lancamento/) ?? wb.SheetNames[0]
+function lerLancamentos(wb: Planilha, mes: Mes | null, avisos: string[]): LancamentoLido[] {
+  const nome = acharAba(wb, /lancamento/) ?? wb.abas[0]?.nome
   if (!nome) return []
-  const sec = secoes(linhas(wb.Sheets[nome])).find((s) => s.cabecalho.some((c) => /^data/.test(c)))
+  const sec = secoes(linhasDa(wb, nome)).find((s) => s.cabecalho.some((c) => /^data/.test(c)))
   if (!sec) {
     avisos.push(`Não achei o cabeçalho (Data, Descrição, Valor) na aba “${nome}”.`)
     return []
@@ -264,13 +268,13 @@ function lerDividasDaSecao(sec: Secao, direcao: DirecaoDivida, pessoaDoBloco: st
   return out
 }
 
-function lerDividasEContas(wb: WorkBook, avisos: string[]): { dividas: DividaLida[]; contas: ContaLida[] } {
+function lerDividasEContas(wb: Planilha, avisos: string[]): { dividas: DividaLida[]; contas: ContaLida[] } {
   const dividas: DividaLida[] = []
   const contas: ContaLida[] = []
   const abaDeve = acharAba(wb, /divida|me deve|quem deve/)
-  for (const nome of wb.SheetNames) {
+  for (const nome of wb.abas.map((a) => a.nome)) {
     if (/lancamento|categoria|parcelas futuras|info da fatura|resumo/.test(normalizar(nome))) continue
-    for (const sec of secoes(linhas(wb.Sheets[nome]))) {
+    for (const sec of secoes(linhasDa(wb, nome))) {
       const tit = normalizar(sec.titulo ?? '')
       const temDesc = sec.cabecalho.some((c) => /descri/.test(c))
       if (/eu devo/.test(tit)) {
@@ -303,7 +307,7 @@ function lerDividasEContas(wb: WorkBook, avisos: string[]): { dividas: DividaLid
 }
 
 /** Lê a planilha inteira. `nomeArquivo` ajuda a achar o mês quando as abas não dizem. */
-export function lerPlanilha(wb: WorkBook, nomeArquivo?: string): LeituraPlanilha {
+export function lerPlanilha(wb: Planilha, nomeArquivo?: string): LeituraPlanilha {
   const avisos: string[] = []
   const mes = detectarMes(wb, nomeArquivo)
   const lancamentos = lerLancamentos(wb, mes, avisos)

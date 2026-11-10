@@ -2,6 +2,7 @@
 // Marcar/desmarcar (pago, recebido, dono) é otimista: a tela muda na hora e volta se der erro.
 import { useMutation, useQueryClient, type QueryClient, type QueryKey } from '@tanstack/react-query'
 import { metaDaChave } from '@/domain/contasAPagar'
+import type { Montagem } from '@/domain/importador'
 import type { Config, ContaFixa, Divida, Lancamento, Mes, Meta, Pessoa } from '@/domain/tipos'
 import type { Json } from '@/lib/database.types'
 import { ok, supabase } from '@/lib/supabase'
@@ -239,26 +240,49 @@ export function useAlternarPagamento() {
 
 // ---------- importação e dados ----------
 
-export interface Importacao {
+export interface ImportacaoPlanilha {
   mes: Mes
-  lancamentos: SemId<Lancamento>[]
-  dividas: SemId<Divida>[]
   renda_centavos: number | null
+  /** Pessoas a criar: nome como está na planilha + cor. */
+  pessoasNovas: { nome: string; cor: string }[]
+  /** Nomes da planilha a guardar como apelido de pessoas existentes. */
+  apelidosNovos: { id: string; apelidos: string[] }[]
+  /** Monta lançamentos/dívidas/contas depois que as pessoas novas têm id. */
+  montar: (pessoaIdDoNome: (nome: string) => string | null) => Montagem
 }
 
-export function useImportarFatura() {
+/**
+ * Importação da planilha: cria pessoas novas, guarda apelidos, grava lançamentos e dívidas
+ * numa transação (importar_fatura) e cria as contas fixas escolhidas.
+ */
+export function useImportarPlanilha() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (imp: Importacao) =>
-      ok(
+    mutationFn: async (imp: ImportacaoPlanilha) => {
+      const ids = new Map<string, string>()
+      if (imp.pessoasNovas.length) {
+        const criadas = ok(
+          await supabase
+            .from('pessoas')
+            .insert(imp.pessoasNovas.map((p) => ({ nome: p.nome, cor: p.cor })))
+            .select('id, nome'),
+        )
+        for (const p of criadas) ids.set(p.nome, p.id)
+      }
+      for (const a of imp.apelidosNovos) ok(await supabase.from('pessoas').update({ apelidos: a.apelidos }).eq('id', a.id))
+      const m = imp.montar((nome) => ids.get(nome) ?? null)
+      const r = ok(
         await supabase.rpc('importar_fatura', {
           p_mes: imp.mes,
-          p_lancamentos: imp.lancamentos as unknown as Json,
-          p_dividas: imp.dividas as unknown as Json,
+          p_lancamentos: m.lancamentos as unknown as Json,
+          p_dividas: m.dividas as unknown as Json,
           ...(imp.renda_centavos ? { p_renda_centavos: imp.renda_centavos } : {}),
         }),
-      ) as { lancamentos: number; dividas: number },
-    onSuccess: () => invalidar(qc, chaves.lancamentos, chaves.dividas, chaves.config),
+      ) as { lancamentos: number; dividas: number }
+      if (m.contas.length) ok(await supabase.from('contas_fixas').insert(m.contas))
+      return { ...r, contas: m.contas.length, pessoas: imp.pessoasNovas.length }
+    },
+    onSettled: () => invalidar(qc, chaves.lancamentos, chaves.dividas, chaves.config, chaves.pessoas, chaves.contas),
   })
 }
 
