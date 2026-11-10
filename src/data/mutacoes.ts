@@ -271,7 +271,9 @@ export function useImportarPlanilha() {
       }
       for (const a of imp.apelidosNovos) ok(await supabase.from('pessoas').update({ apelidos: a.apelidos }).eq('id', a.id))
       const m = imp.montar((nome) => ids.get(nome) ?? null)
-      const r = ok(
+      // Sem lançamentos e sem dívidas (ex.: só metas), não chama importar_fatura: nada do mês é tocado.
+      const temFatura = m.lancamentos.length > 0 || m.dividas.length > 0
+      const r = !temFatura ? { lancamentos: 0, dividas: 0 } : ok(
         await supabase.rpc('importar_fatura', {
           p_mes: imp.mes,
           p_lancamentos: m.lancamentos as unknown as Json,
@@ -280,9 +282,13 @@ export function useImportarPlanilha() {
         }),
       ) as { lancamentos: number; dividas: number }
       if (m.contas.length) ok(await supabase.from('contas_fixas').insert(m.contas))
-      return { ...r, contas: m.contas.length, pessoas: imp.pessoasNovas.length }
+      if (m.metas.novas.length) ok(await supabase.from('metas').insert(m.metas.novas))
+      for (const { id, ...v } of m.metas.atualizar) ok(await supabase.from('metas').update(v).eq('id', id))
+      const metas = m.metas.novas.length + m.metas.atualizar.length
+      return { ...r, contas: m.contas.length, metas, pessoas: imp.pessoasNovas.length }
     },
-    onSettled: () => invalidar(qc, chaves.lancamentos, chaves.dividas, chaves.config, chaves.pessoas, chaves.contas),
+    onSettled: () =>
+      invalidar(qc, chaves.lancamentos, chaves.dividas, chaves.config, chaves.pessoas, chaves.contas, chaves.metas),
   })
 }
 

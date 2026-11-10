@@ -3,12 +3,13 @@ import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useDialogo } from '@/components/Dialogo'
 import { useToast } from '@/components/Toast'
-import { useConfig, useContasFixas, useLancamentos, usePessoas } from '@/data/consultas'
+import { useConfig, useContasFixas, useLancamentos, useMetas, usePessoas } from '@/data/consultas'
 import { useImportarPlanilha } from '@/data/mutacoes'
 import { normalizar } from '@/domain/categoria'
 import { formatar, somar } from '@/domain/dinheiro'
 import {
-  lerPlanilha, montarImportacao, resolverPessoa, sugerirVinculos, type Decisao, type LeituraPlanilha,
+  lerPlanilha, metaComMesmoNome, montarImportacao, resolverPessoa, sugerirVinculos, type Decisao,
+  type LeituraPlanilha,
 } from '@/domain/importador'
 import { ehMes, nomeMesAno } from '@/domain/meses'
 import { EU, type Mes, type Pessoa } from '@/domain/tipos'
@@ -22,7 +23,19 @@ async function lerArquivo(file: File): Promise<LeituraPlanilha> {
   return lerPlanilha(lerXlsx(await file.arrayBuffer()), file.name)
 }
 
-export function Importar({ mes }: { mes: Mes }) {
+async function baixarModeloMetas() {
+  const { modeloMetas } = await import('@/domain/planilhaXlsx')
+  const url = URL.createObjectURL(
+    new Blob([modeloMetas()], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+  )
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'modelo-metas.xlsx'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+export function Importar({ mes, foco }: { mes: Mes; foco?: 'metas' }) {
   const { fechar } = useDialogo()
   const toast = useToast()
   const [leitura, setLeitura] = useState<{ dados: LeituraPlanilha; arquivo: string } | null>(null)
@@ -48,8 +61,9 @@ export function Importar({ mes }: { mes: Mes }) {
     <>
       <h3>Importar planilha</h3>
       <p>
-        Envie a planilha da fatura (.xlsx). Eu leio as abas Lançamentos, Quem me deve e Minhas despesas e mostro tudo antes
-        de gravar.
+        {foco === 'metas'
+          ? 'Envie uma planilha (.xlsx) com uma tabela de metas: Meta, Alvo, Guardado, Por mês e Prazo. Mostro tudo antes de gravar.'
+          : 'Envie a planilha da fatura (.xlsx). Eu leio as abas Lançamentos, Quem me deve, Minhas despesas e Metas e mostro tudo antes de gravar.'}
       </p>
       <div
         className={`drop${arrastando ? ' over' : ''}`}
@@ -81,6 +95,11 @@ export function Importar({ mes }: { mes: Mes }) {
         />
       </div>
       <div className="mfoot" style={{ marginTop: 14 }}>
+        {foco === 'metas' && (
+          <button type="button" className="btn" style={{ marginRight: 'auto' }} onClick={() => void baixarModeloMetas()}>
+            Baixar modelo
+          </button>
+        )}
         <button type="button" className="btn" onClick={fechar}>Cancelar</button>
       </div>
     </>
@@ -101,6 +120,7 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
   const { data: config } = useConfig()
   const { data: lancamentos = [] } = useLancamentos()
   const { data: contasExistentes = [] } = useContasFixas()
+  const { data: metasExistentes = [] } = useMetas()
   const importar = useImportarPlanilha()
 
   const [mes, setMes] = useState<Mes>(leitura.mes_detectado ?? mesPadrao)
@@ -121,13 +141,18 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
     () => new Set(leitura.contas.flatMap((c, i) => (c.fixa ? [i] : []))),
   )
 
+  const [metasSel, setMetasSel] = useState<Set<number>>(() => new Set(leitura.metas.map((_, i) => i)))
+  const metasEscolhidas = [...metasSel]
+
   // Prévia do resultado com ids provisórios para quem ainda vai ser criado.
   const idPrevia = (nome: string) => {
     const e = escolhaDe(nome)
     return e === IGNORAR ? null : e === NOVA ? `novo:${nome}` : e
   }
   const contasEscolhidas = [...contasSel].filter((i) => !jaExiste(leitura.contas[i]!.nome))
-  const previa = montarImportacao({ leitura, mes, vinculos, decisoes, pessoaId: idPrevia, contas: contasEscolhidas })
+  const previa = montarImportacao({
+    leitura, mes, vinculos, decisoes, pessoaId: idPrevia, contas: contasEscolhidas, metas: metasEscolhidas, metasExistentes,
+  })
   const nomeDoId = (id: string) =>
     id === EU ? 'Eu' : id.startsWith('novo:') ? id.slice(5) : (pessoas.find((p) => p.id === id)?.nome ?? id)
   const porDono = new Map<string, number>()
@@ -136,12 +161,14 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
   const euDevo = previa.dividas.filter((d) => d.direcao === 'eu_devo')
   const existentes = lancamentos.filter((l) => l.mes_fatura === mes).length
   const usarRenda = !!leitura.renda_centavos && !config?.renda_centavos
+  // Só lançamentos e dívidas dependem do mês da fatura.
+  const temFatura = leitura.lancamentos.length > 0 || leitura.dividas.length > 0
 
-  if (!leitura.lancamentos.length && !leitura.dividas.length) {
+  if (!leitura.lancamentos.length && !leitura.dividas.length && !leitura.metas.length && !leitura.contas.length) {
     return (
       <>
         <h3>Nada para importar</h3>
-        <p>Não encontrei lançamentos nem dívidas em “{arquivo}”.</p>
+        <p>Não encontrei lançamentos, dívidas, contas nem metas em “{arquivo}”.</p>
         {leitura.avisos.map((a) => <p key={a}>{a}</p>)}
         <div className="mfoot"><button type="button" className="btn primary" onClick={fechar}>Entendi</button></div>
       </>
@@ -168,7 +195,7 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
         apelidosNovos: [...apelidos.values()].map((p) => ({ id: p.id, apelidos: p.apelidos ?? [] })),
         montar: (idDoNovo) =>
           montarImportacao({
-            leitura, mes, vinculos, decisoes, contas: contasEscolhidas,
+            leitura, mes, vinculos, decisoes, contas: contasEscolhidas, metas: metasEscolhidas, metasExistentes,
             pessoaId: (nome) => {
               const e = escolhaDe(nome)
               return e === IGNORAR ? null : e === NOVA ? idDoNovo(nome) : e
@@ -178,8 +205,15 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
       {
         onSuccess: (r) => {
           fechar()
-          toast(`${r.lancamentos} lançamentos importados${r.dividas ? ` · ${r.dividas} dívidas` : ''}`)
-          navegar({ pathname: '/lancamentos', search: `?mes=${mes}` })
+          const partes = [
+            r.lancamentos && `${r.lancamentos} lançamentos`,
+            r.dividas && `${r.dividas} dívidas`,
+            r.contas && `${r.contas} contas`,
+            r.metas && `${r.metas} metas`,
+          ].filter(Boolean)
+          toast(partes.length ? `Importado: ${partes.join(' · ')}` : 'Nada novo para importar')
+          if (r.lancamentos) navegar({ pathname: '/lancamentos', search: `?mes=${mes}` })
+          else if (r.metas) navegar({ pathname: '/metas', search: `?mes=${mes}` })
         },
       },
     )
@@ -190,6 +224,7 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
   return (
     <>
       <h3>Conferir importação</h3>
+      {temFatura ? (
       <p>
         “{arquivo}” vai para a fatura de{' '}
         <input
@@ -201,12 +236,17 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
         />
         {leitura.mes_detectado && leitura.mes_detectado === mes ? ' (achei na planilha)' : ''}
       </p>
+      ) : (
+        <p>Conferindo “{arquivo}”.</p>
+      )}
 
       <ul className="summary-list">
+        {leitura.lancamentos.length > 0 && (
         <li>
           <span>Lançamentos</span>
           <b className="num">{previa.lancamentos.length} · {formatar(somar(previa.lancamentos, (l) => l.valor_centavos))}</b>
         </li>
+        )}
         {[...porDono].sort(([a], [b]) => (a === EU ? -1 : b === EU ? 1 : 0)).map(([dono, v]) => (
           <li key={dono}>
             <span className="muted">{dono === EU ? 'Minha parte' : `De ${nomeDoId(dono)}`}</span>
@@ -222,15 +262,17 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
         {euDevo.length > 0 && (
           <li><span>Eu devo</span><b className="num">{euDevo.length} · {formatar(somar(euDevo, (d) => d.valor_centavos))}</b></li>
         )}
+        {leitura.renda_centavos !== null && (
         <li>
           <span>Renda</span>
           <b className="num">
-            {leitura.renda_centavos ? `${formatar(leitura.renda_centavos)}${usarRenda ? '' : ' (mantida a atual)'}` : 'não encontrada'}
+            {formatar(leitura.renda_centavos)}{usarRenda ? '' : ' (mantida a atual)'}
           </b>
         </li>
+        )}
       </ul>
 
-      {existentes > 0 && <p><b>Já existem {existentes} lançamentos em {nomeMesAno(mes)}.</b> Eles serão substituídos.</p>}
+      {existentes > 0 && leitura.lancamentos.length > 0 && <p><b>Já existem {existentes} lançamentos em {nomeMesAno(mes)}.</b> Eles serão substituídos.</p>}
 
       {nomes.length > 0 && (
         <>
@@ -316,6 +358,41 @@ function Previa({ leitura, arquivo, mesPadrao }: { leitura: LeituraPlanilha; arq
                 />
                 <span className="grow">{c.nome}{existe ? ' (já cadastrada)' : c.fixa ? '' : ' (não é fixa)'}</span>
                 <span className="num">{formatar(c.valor_centavos)}</span>
+              </label>
+            )
+          })}
+        </>
+      )}
+
+      {leitura.metas.length > 0 && (
+        <>
+          <div className="sub">Metas</div>
+          <p style={{ marginBottom: 6 }}>Metas com o mesmo nome de uma já cadastrada são atualizadas com os valores da planilha.</p>
+          {leitura.metas.map((m, i) => {
+            const existe = !!metaComMesmoNome(m.nome, metasExistentes)
+            return (
+              <label key={i} className="switch" style={{ marginBottom: 6, fontWeight: 500 }}>
+                <input
+                  type="checkbox"
+                  checked={metasSel.has(i)}
+                  onChange={(e) =>
+                    setMetasSel((s) => {
+                      const n = new Set(s)
+                      if (e.target.checked) n.add(i)
+                      else n.delete(i)
+                      return n
+                    })
+                  }
+                />
+                <span className="grow">
+                  {m.emoji ?? '🎯'} {m.nome}
+                  {existe ? ' (atualiza a existente)' : ''}
+                  <span className="lbl" style={{ display: 'block' }}>
+                    {formatar(m.atual_centavos)} de {formatar(m.alvo_centavos)}
+                    {m.mensal_centavos ? ` · ${formatar(m.mensal_centavos)}/mês` : ''}
+                    {m.prazo ? ` · até ${m.prazo.slice(5, 7)}/${m.prazo.slice(0, 4)}` : ''}
+                  </span>
+                </span>
               </label>
             )
           })}

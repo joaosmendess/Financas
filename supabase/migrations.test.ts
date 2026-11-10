@@ -159,6 +159,15 @@ describe('importar_fatura', () => {
   })
 })
 
+describe('importar sem lançamentos', () => {
+  it('não apaga os lançamentos do mês quando a planilha não traz nenhum', async () => {
+    await como(A, `insert into lancamentos (mes_fatura, descricao, valor_centavos) values ('2026-12', 'FICA', 100)`)
+    const [r] = await como<{ r: unknown }>(A, `select importar_fatura('2026-12', '[]'::jsonb, '[]'::jsonb) as r`)
+    expect(r!.r).toEqual({ lancamentos: 0, dividas: 0 })
+    expect(await como(A, 'select descricao from lancamentos')).toEqual([{ descricao: 'FICA' }])
+  })
+})
+
 describe('receber_tudo e apagar_tudo', () => {
   it('receber_tudo marca só o que a pessoa me deve', async () => {
     const pai = await novaPessoa(A, 'Painho')

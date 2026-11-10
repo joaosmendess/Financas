@@ -11,7 +11,9 @@ import { CATEGORIAS, categoria, normalizar } from './categoria'
 import { parseValor } from './dinheiro'
 import { MESES } from './meses'
 import { lerParcela, normalizarParcela, parcelaNaDescricao } from './parcelas'
-import { EU, type Centavos, type ContaFixa, type DirecaoDivida, type Divida, type Lancamento, type Mes, type Pessoa } from './tipos'
+import {
+  EU, type Centavos, type ContaFixa, type DirecaoDivida, type Divida, type Lancamento, type Mes, type Meta, type Pessoa,
+} from './tipos'
 
 export type Celula = string | number | boolean | Date | null
 export type Linha = Celula[]
@@ -50,12 +52,23 @@ export interface ContaLida {
   fixa: boolean
 }
 
+export interface MetaLida {
+  emoji: string | null
+  nome: string
+  alvo_centavos: Centavos
+  atual_centavos: Centavos
+  mensal_centavos: Centavos
+  prazo: Mes | null
+  dia: number | null
+}
+
 export interface LeituraPlanilha {
   mes_detectado: Mes | null
   renda_centavos: Centavos | null
   lancamentos: LancamentoLido[]
   dividas: DividaLida[]
   contas: ContaLida[]
+  metas: MetaLida[]
   avisos: string[]
 }
 
@@ -78,10 +91,10 @@ function ehTitulo(r: Linha): string | null {
   return p.length === 1 && ehTexto(p[0]!) && p[0].trim().length <= 60 ? p[0].trim() : null
 }
 
-/** Linha de cabeçalho: só textos, com uma coluna "Valor" e pelo menos mais uma. */
+/** Linha de cabeçalho: só textos, com uma coluna de valor ("Valor", ou "Alvo"/"Guardado" nas metas). */
 function ehCabecalho(r: Linha): boolean {
   const p = preenchidas(r)
-  return p.length >= 2 && p.every(ehTexto) && r.some((c) => ehTexto(c) && /^valor/.test(normalizar(c)))
+  return p.length >= 2 && p.every(ehTexto) && r.some((c) => ehTexto(c) && /^valor|alvo|guardado|^mensal|por mes/.test(normalizar(c)))
 }
 
 interface Secao {
@@ -194,9 +207,12 @@ function categoriaLida(valor: Celula, desc: string): string {
 }
 
 function lerLancamentos(wb: Planilha, mes: Mes | null, avisos: string[]): LancamentoLido[] {
-  const nome = acharAba(wb, /lancamento/) ?? wb.abas[0]?.nome
+  // Sem aba "Lançamentos", procura em qualquer aba uma tabela Data | … | Valor (planilha só de metas não avisa nada).
+  const abaNomeada = acharAba(wb, /lancamento/)
+  const temData = (s: Secao) => s.cabecalho.some((c) => /^data/.test(c)) && s.cabecalho.some((c) => /descri|estabelec/.test(c))
+  const nome = abaNomeada ?? wb.abas.find((a) => secoes(a.linhas).some(temData))?.nome
   if (!nome) return []
-  const sec = secoes(linhasDa(wb, nome)).find((s) => s.cabecalho.some((c) => /^data/.test(c)))
+  const sec = secoes(linhasDa(wb, nome)).find(temData)
   if (!sec) {
     avisos.push(`Não achei o cabeçalho (Data, Descrição, Valor) na aba “${nome}”.`)
     return []
@@ -306,13 +322,76 @@ function lerDividasEContas(wb: Planilha, avisos: string[]): { dividas: DividaLid
   return { dividas, contas }
 }
 
+// ---------- metas ----------
+
+const MES_CURTO = MESES.map((m) => normalizar(m).slice(0, 3))
+
+/** Prazo da meta para 'YYYY-MM': Date, série do Excel, "10/2027", "out/2027", "outubro de 2027", "2027-10". */
+export function prazoMes(v: Celula): Mes | null {
+  const d = dataISO(v, null)
+  if (d && (v instanceof Date || typeof v === 'number')) return d.slice(0, 7)
+  const t = normalizar(texto(v))
+  if (!t) return null
+  let m = /^(\d{4})-(\d{1,2})/.exec(t)
+  if (m && +m[2]! >= 1 && +m[2]! <= 12) return `${m[1]}-${m[2]!.padStart(2, '0')}`
+  m = /^(\d{1,2})\/(\d{4})$/.exec(t)
+  if (m && +m[1]! >= 1 && +m[1]! <= 12) return `${m[2]}-${m[1]!.padStart(2, '0')}`
+  const comNome = mesNoTexto(t)
+  if (comNome) return comNome
+  m = /^([a-z]{3})[a-z]*\.?\s*(?:\/|de\s+)?\s*(\d{2}|\d{4})$/.exec(t)
+  const idx = m ? MES_CURTO.indexOf(m[1]!) : -1
+  if (m && idx >= 0) return `${m[2]!.length === 2 ? '20' + m[2] : m[2]}-${String(idx + 1).padStart(2, '0')}`
+  return null
+}
+
+/**
+ * Seção de metas, em qualquer aba: um cabeçalho com o nome da meta e pelo menos o alvo ou o guardado.
+ * Ex.: Meta | Alvo | Guardado | Por mês | Prazo  (Emoji e Dia são opcionais).
+ */
+function lerMetas(wb: Planilha): MetaLida[] {
+  const out: MetaLida[] = []
+  for (const aba of wb.abas) {
+    if (/lancamento|categoria|parcelas futuras|info da fatura/.test(normalizar(aba.nome))) continue
+    for (const sec of secoes(aba.linhas)) {
+      const cab = sec.cabecalho
+      const cNome = coluna(cab, /^(meta|nome|objetivo|reserva)(\s|$)/)
+      const cAlvo = coluna(cab, /alvo|juntar|valor (da |total)?meta|^objetivo \(|^total/, cNome === null ? [] : [cNome])
+      const cAtual = coluna(cab, /guardado|^atual|^tenho|acumulado|^saldo|^ja tenho/)
+      if (cNome === null || (cAlvo === null && cAtual === null)) continue
+      const cMensal = coluna(cab, /mensal|por mes|aporte|guardar/, [cAtual ?? -1])
+      const cPrazo = coluna(cab, /prazo|ate quando|^data|^quando/)
+      const cEmoji = coluna(cab, /emoji|icone/)
+      const cDia = coluna(cab, /^dia/)
+      for (const r of sec.dados) {
+        const nome = texto(celula(r, cNome))
+        if (!nome || RE_TOTAL.test(normalizar(nome))) continue
+        const alvo = parseValor(celula(r, cAlvo)) ?? 0
+        const atual = parseValor(celula(r, cAtual)) ?? 0
+        if (alvo <= 0 && atual <= 0) continue
+        const dia = Number(celula(r, cDia))
+        out.push({
+          emoji: texto(celula(r, cEmoji)) || null,
+          nome,
+          alvo_centavos: Math.max(alvo, 0),
+          atual_centavos: Math.max(atual, 0),
+          mensal_centavos: Math.max(parseValor(celula(r, cMensal)) ?? 0, 0),
+          prazo: prazoMes(celula(r, cPrazo)),
+          dia: Number.isInteger(dia) && dia >= 1 && dia <= 31 ? dia : null,
+        })
+      }
+    }
+  }
+  return out
+}
+
 /** Lê a planilha inteira. `nomeArquivo` ajuda a achar o mês quando as abas não dizem. */
 export function lerPlanilha(wb: Planilha, nomeArquivo?: string): LeituraPlanilha {
   const avisos: string[] = []
   const mes = detectarMes(wb, nomeArquivo)
   const lancamentos = lerLancamentos(wb, mes, avisos)
   const { dividas, contas } = lerDividasEContas(wb, avisos)
-  return { mes_detectado: mes, renda_centavos: detectarRenda(wb), lancamentos, dividas, contas, avisos }
+  const metas = lerMetas(wb)
+  return { mes_detectado: mes, renda_centavos: detectarRenda(wb), lancamentos, dividas, contas, metas, avisos }
 }
 
 // ---------- pessoas ----------
@@ -411,6 +490,8 @@ export interface Montagem {
   lancamentos: Omit<Lancamento, 'id'>[]
   dividas: Omit<Divida, 'id'>[]
   contas: Omit<ContaFixa, 'id'>[]
+  /** Metas novas e metas existentes (mesmo nome) com os valores da planilha. */
+  metas: { novas: Omit<Meta, 'id'>[]; atualizar: Meta[] }
 }
 
 /**
@@ -426,6 +507,9 @@ export function montarImportacao(args: {
   pessoaId: (nome: string) => string | null
   /** Contas a criar (índices em leitura.contas). */
   contas?: readonly number[]
+  /** Metas a importar (índices em leitura.metas) e as já cadastradas, para atualizar pelo nome. */
+  metas?: readonly number[]
+  metasExistentes?: readonly Meta[]
 }): Montagem {
   const { leitura, mes } = args
   const lancs: Omit<Lancamento, 'id'>[] = leitura.lancamentos.map((l) => ({
@@ -467,5 +551,26 @@ export function montarImportacao(args: {
     const c = leitura.contas[i]
     return c ? [{ nome: c.nome, valor_centavos: c.valor_centavos, dia: 10, ativa: true }] : []
   })
-  return { lancamentos: [...lancs, ...extras], dividas, contas }
+  const metas: Montagem['metas'] = { novas: [], atualizar: [] }
+  for (const i of args.metas ?? []) {
+    const m = leitura.metas[i]
+    if (!m) continue
+    const existente = metaComMesmoNome(m.nome, args.metasExistentes ?? [])
+    const base = {
+      nome: m.nome,
+      alvo_centavos: m.alvo_centavos,
+      atual_centavos: m.atual_centavos,
+      mensal_centavos: m.mensal_centavos,
+      prazo: m.prazo,
+    }
+    if (existente)
+      metas.atualizar.push({ ...existente, ...base, emoji: m.emoji ?? existente.emoji, dia: m.dia ?? existente.dia, prazo: m.prazo ?? existente.prazo })
+    else metas.novas.push({ ...base, emoji: m.emoji ?? '🎯', dia: m.dia ?? 10 })
+  }
+  return { lancamentos: [...lancs, ...extras], dividas, contas, metas }
+}
+
+/** Meta já cadastrada com o mesmo nome (sem acento/caixa). */
+export function metaComMesmoNome<T extends Pick<Meta, 'nome'>>(nome: string, metas: readonly T[]): T | null {
+  return metas.find((x) => normalizar(x.nome) === normalizar(nome)) ?? null
 }

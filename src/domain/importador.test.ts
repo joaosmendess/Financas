@@ -2,12 +2,13 @@ import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { utils, type WorkBook } from 'xlsx'
-import { pessoa } from './__testes__/fabrica'
+import { meta, pessoa } from './__testes__/fabrica'
 import { somar } from './dinheiro'
 import {
-  dataISO, lerPlanilha, mesNoTexto, montarImportacao, parcelaDoTexto, resolverPessoa, sugerirVinculos, type LeituraPlanilha,
+  dataISO, lerPlanilha, mesNoTexto, montarImportacao, parcelaDoTexto, prazoMes, resolverPessoa, sugerirVinculos,
+  type LeituraPlanilha,
 } from './importador'
-import { deWorkbook, lerXlsx } from './planilhaXlsx'
+import { deWorkbook, lerXlsx, modeloMetas } from './planilhaXlsx'
 
 const D = (iso: string) => new Date(`${iso}T00:00:00`) // meia-noite local, como o SheetJS devolve
 
@@ -244,6 +245,82 @@ describe('vincular dívidas às compras', () => {
   })
 })
 
+describe('metas', () => {
+  function comMetas(): WorkBook {
+    const wb = planilhaDezembro()
+    utils.book_append_sheet(wb, utils.aoa_to_sheet([
+      ['Metas e reserva'],
+      ['Emoji', 'Meta', 'Alvo', 'Guardado', 'Por mês', 'Prazo', 'Dia'],
+      ['🛟', 'Reserva de emergência', 11000, 2400, 700, D('2027-10-01'), 10],
+      [null, 'Entrada do apartamento', 'R$ 40.000,00', '3.500,00', '600', '12/2028', null],
+      ['🏃', 'Viagem Recife 2027', 2500, 450, 250, 'mai/2027', 5],
+      [null, 'Ideia sem valor', null, null, null, null, null],
+      [null, 'Total', 53500, 6350, 1550],
+    ]), 'Metas')
+    return wb
+  }
+  const l = lerPlanilha(deWorkbook(comMetas()))
+
+  it('lê a aba de metas com prazo em vários formatos', () => {
+    expect(l.metas).toEqual([
+      { emoji: '🛟', nome: 'Reserva de emergência', alvo_centavos: 1100000, atual_centavos: 240000, mensal_centavos: 70000, prazo: '2027-10', dia: 10 },
+      { emoji: null, nome: 'Entrada do apartamento', alvo_centavos: 4000000, atual_centavos: 350000, mensal_centavos: 60000, prazo: '2028-12', dia: null },
+      { emoji: '🏃', nome: 'Viagem Recife 2027', alvo_centavos: 250000, atual_centavos: 45000, mensal_centavos: 25000, prazo: '2027-05', dia: 5 },
+    ])
+  })
+  it('metas não atrapalham o resto da leitura', () => {
+    expect(l.lancamentos).toHaveLength(18)
+    expect(l.contas).toHaveLength(6)
+    expect(l.dividas.filter((d) => d.direcao === 'me_deve')).toHaveLength(10)
+  })
+  it('seção "Metas" dentro de Minhas despesas também vale', () => {
+    const wb = utils.book_new()
+    utils.book_append_sheet(wb, utils.aoa_to_sheet([
+      ['Contas fora do cartão'],
+      ['Conta', 'Descrição', 'Valor', 'Fixa?'],
+      ['Luz', null, 170, 'sim'],
+      ['Metas'],
+      ['Nome', 'Quanto quer juntar', 'Já tenho', 'Mensal'],
+      ['Notebook', 6000, 1000, 500],
+    ]), 'Minhas despesas')
+    const x = lerPlanilha(deWorkbook(wb))
+    expect(x.contas.map((c) => c.nome)).toEqual(['Luz'])
+    expect(x.metas).toEqual([expect.objectContaining({ nome: 'Notebook', alvo_centavos: 600000, atual_centavos: 100000, mensal_centavos: 50000 })])
+  })
+  it('a planilha de dezembro não tem metas', () => {
+    expect(lerPlanilha(deWorkbook(planilhaDezembro())).metas).toEqual([])
+  })
+  it('monta metas novas e atualiza as que já existem pelo nome', () => {
+    const existente = meta({ id: 'm1', nome: 'RESERVA DE EMERGENCIA', emoji: '💰', atual_centavos: 100000, dia: 15, prazo: '2027-12' })
+    const m = montarImportacao({
+      leitura: l, mes: '2026-12', vinculos: [], pessoaId: () => null, metas: [0, 2], metasExistentes: [existente],
+    })
+    expect(m.metas.atualizar).toEqual([
+      { ...existente, nome: 'Reserva de emergência', alvo_centavos: 1100000, atual_centavos: 240000, mensal_centavos: 70000, prazo: '2027-10', emoji: '🛟', dia: 10 },
+    ])
+    expect(m.metas.novas).toEqual([
+      { nome: 'Viagem Recife 2027', alvo_centavos: 250000, atual_centavos: 45000, mensal_centavos: 25000, prazo: '2027-05', emoji: '🏃', dia: 5 },
+    ])
+  })
+  it('o modelo para baixar é lido de volta pelo importador', () => {
+    const x = lerPlanilha(lerXlsx(new Uint8Array(modeloMetas())))
+    expect(x.metas.map((m) => [m.nome, m.alvo_centavos, m.prazo])).toEqual([
+      ['Reserva de emergência', 1100000, '2027-10'],
+      ['Entrada do apartamento', 4000000, '2028-12'],
+    ])
+  })
+  it('prazoMes', () => {
+    expect(prazoMes('10/2027')).toBe('2027-10')
+    expect(prazoMes('out/2027')).toBe('2027-10')
+    expect(prazoMes('Outubro de 2027')).toBe('2027-10')
+    expect(prazoMes('dez 28')).toBe('2028-12')
+    expect(prazoMes('2027-03')).toBe('2027-03')
+    expect(prazoMes(D('2027-03-15'))).toBe('2027-03')
+    expect(prazoMes('sem prazo')).toBeNull()
+    expect(prazoMes('13/2027')).toBeNull()
+  })
+})
+
 describe('auxiliares', () => {
   it('resolverPessoa por nome, apelido e palavra', () => {
     const ps = [pessoa({ id: 'pai', nome: 'Painho', apelidos: ['José Valter'] }), pessoa({ id: 's', nome: 'Sthe' })]
@@ -295,6 +372,7 @@ describe.skipIf(!existsSync(REAL))('planilha real de dezembro/2026', () => {
     expect(somar(l.lancamentos, (x) => x.valor_centavos)).toBe(cents(2382.11))
     expect(somar(l.dividas.filter((d) => d.direcao === 'me_deve'), (d) => d.valor_centavos)).toBe(cents(1636.86))
     expect(l.contas.filter((c) => c.fixa)).toHaveLength(4)
+    expect(l.metas).toEqual([])
     const ps = [pessoa({ id: 'pai', nome: 'Painho', apelidos: ['José Valter'] }), pessoa({ id: 'sthe', nome: 'Sthe', apelidos: ['Elijani'] })]
     const m = montarImportacao({ leitura: l, mes: '2026-12', vinculos: sugerirVinculos(l), pessoaId: (n) => resolverPessoa(n, ps)?.id ?? null })
     const meu = somar(m.lancamentos.filter((x) => x.dono === 'eu'), (x) => x.valor_centavos)

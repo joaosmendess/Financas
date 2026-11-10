@@ -4,6 +4,8 @@ import { Valor } from '@/components/Valor'
 import { useExcluirMeta } from '@/data/mutacoes'
 import { useMetas } from '@/data/consultas'
 import { FormMeta, FormMovimentoMeta } from '@/features/formularios/formularios'
+import { Importar } from '@/features/importar/Importar'
+import { useMes } from '@/state/mes'
 import { formatar } from '@/domain/dinheiro'
 import { MESES_CURTOS, mesDaData } from '@/domain/meses'
 import { progressoMeta } from '@/domain/metas'
@@ -15,11 +17,14 @@ export function Metas() {
   const { abrir } = useDialogo()
   const excluir = useExcluirMeta()
   const mesAtual = mesDaData(new Date())
+  const { mes } = useMes()
+  const importar = () => abrir(<Importar mes={mes} foco="metas" />)
 
   return (
     <>
       <div className="vhead">
         <h1>Metas e reserva</h1>
+        <button type="button" className="btn" onClick={importar}>Importar planilha</button>
         <button type="button" className="btn primary" onClick={() => abrir(<FormMeta />)}><Plus strokeWidth={2.4} />Meta</button>
       </div>
       {isPending ? (
@@ -76,7 +81,8 @@ export function Metas() {
         <div className="empty">
           Nenhuma meta ainda. Crie sua reserva de emergência, a entrada do apê ou uma viagem.
           <br />
-          <button type="button" className="btn sm" onClick={() => abrir(<FormMeta />)}>Criar meta</button>
+          <button type="button" className="btn sm" onClick={() => abrir(<FormMeta />)}>Criar meta</button>{' '}
+          <button type="button" className="btn sm" onClick={importar}>Importar planilha</button>
         </div>
       )}
     </>
