@@ -1,0 +1,133 @@
+@import 'tailwindcss';
+
+/* Tokens do protótipo (referencia/financas.html). Tema claro é o padrão;
+   o escuro segue o sistema, a menos que o usuário force data-theme. */
+:root {
+  --bg: #edf0f4;
+  --surface: #ffffff;
+  --surface-2: #f4f6f9;
+  --ink: #14161b;
+  --muted: #687080;
+  --faint: #a1a8b3;
+  --line: #e5e8ee;
+  --blue: #2563eb;
+  --blue-soft: #e8effe;
+  --navy: #1e3a8a;
+  --sky: #9dbbf9;
+  --green: #15803d;
+  --green-2: #22a04b;
+  --green-soft: #e3f6e9;
+  --pink: #e5466f;
+  --amber: #b45309;
+  --amber-soft: #fef1d6;
+  --red: #d12a2a;
+  --red-soft: #fde8e8;
+  --itau: #ec7000;
+  --shadow: 0 1px 2px rgba(20, 24, 32, 0.04), 0 2px 8px rgba(20, 24, 32, 0.04);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0d1015;
+    --surface: #161a21;
+    --surface-2: #1e232c;
+    --ink: #edf0f4;
+    --muted: #9aa3b2;
+    --faint: #677082;
+    --line: #272d37;
+    --blue: #5b8cff;
+    --blue-soft: #1c2740;
+    --navy: #3f5fc0;
+    --sky: #2f4a86;
+    --green: #3cc46b;
+    --green-2: #2fa85a;
+    --green-soft: #12301e;
+    --pink: #f0628b;
+    --amber: #f2b13c;
+    --amber-soft: #3a2b0e;
+    --red: #f06b6b;
+    --red-soft: #3a1717;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #0d1015;
+  --surface: #161a21;
+  --surface-2: #1e232c;
+  --ink: #edf0f4;
+  --muted: #9aa3b2;
+  --faint: #677082;
+  --line: #272d37;
+  --blue: #5b8cff;
+  --blue-soft: #1c2740;
+  --navy: #3f5fc0;
+  --sky: #2f4a86;
+  --green: #3cc46b;
+  --green-2: #2fa85a;
+  --green-soft: #12301e;
+  --pink: #f0628b;
+  --amber: #f2b13c;
+  --amber-soft: #3a2b0e;
+  --red: #f06b6b;
+  --red-soft: #3a1717;
+  --shadow: none;
+  color-scheme: dark;
+}
+
+/* Expõe os tokens como utilitários do Tailwind: bg-surface, text-muted, border-line… */
+@theme inline {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-blue: var(--blue);
+  --color-blue-soft: var(--blue-soft);
+  --color-navy: var(--navy);
+  --color-sky: var(--sky);
+  --color-green: var(--green);
+  --color-green-2: var(--green-2);
+  --color-green-soft: var(--green-soft);
+  --color-pink: var(--pink);
+  --color-amber: var(--amber);
+  --color-amber-soft: var(--amber-soft);
+  --color-red: var(--red);
+  --color-red-soft: var(--red-soft);
+  --color-itau: var(--itau);
+  --shadow-card: var(--shadow);
+  --radius-card: 22px;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 500 14px/1.45 var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  button {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+}
+
+@utility num {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
